@@ -21,14 +21,14 @@
 #  Declare the package name and version.
 #  All the bouquets and brickbats go to Bob. :-)
 #----------------------------------------------------------------
-AC_INIT(sppdgTcllib, 1.0, techentin.robert@mayo.edu)
+AC_INIT([sppdgTcllib],[1.0],[techentin.robert@mayo.edu])
 
 #----------------------------------------------------------------
 #  Give autoconf a point of reference, and tell it that
 #  we're going to use automake later.
 #----------------------------------------------------------------
 AC_CONFIG_SRCDIR
-AM_INIT_AUTOMAKE(sppdgTcllib, 1.0)
+AM_INIT_AUTOMAKE
 
 
 #---------------------------------------------------------------
@@ -36,12 +36,6 @@ AM_INIT_AUTOMAKE(sppdgTcllib, 1.0)
 #---------------------------------------------------------------
 AC_CONFIG_SUBDIRS(console getFilePreview sgraph addressDialog)
 
-  
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
-
-
-
-
-
-

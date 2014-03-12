@@ -20,7 +20,7 @@
 #  Declare the package name and version.
 #  All the bouquets and brickbats go to Sharon. :-)
 #----------------------------------------------------------------
-AC_INIT(TNT MMTL, 1.2.2, techentin.robert@mayo.edu)
+AC_INIT([TNT MMTL],[1.2.2],[techentin.robert@mayo.edu])
 
 #----------------------------------------------------------------
 #  Give autoconf a point of reference, and tell it that

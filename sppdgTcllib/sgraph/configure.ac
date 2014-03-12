@@ -22,27 +22,21 @@
 #  Declare the package name and version.
 #  All the bouquets and brickbats go to Sharon. :-)
 #----------------------------------------------------------------
-AC_INIT(SGRAPH, 1.0, zahn.sharon@mayo.edu)
+AC_INIT([SGRAPH],[1.0],[zahn.sharon@mayo.edu])
 
 #----------------------------------------------------------------
 #  Give autoconf a point of reference, and tell it that
 #  we're going to use automake later.
 #----------------------------------------------------------------
 AC_CONFIG_SRCDIR
-AM_INIT_AUTOMAKE(sgraph, 1.0)
+AM_INIT_AUTOMAKE
 
 
 #----------------------------------------------------------------
-#  Don't bother checking for host type, libraries, or 
+#  Don't bother checking for host type, libraries, or
 #  header file variations, as we're just dealing
 #  with highly portable scripts at this level.
 #----------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
-
-
-
-
-
-

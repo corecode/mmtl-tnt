@@ -20,7 +20,7 @@
 #  Declare the package name and version.
 #  All the bouquets and brickbats go to Sharon. :-)
 #----------------------------------------------------------------
-AC_INIT(CSDL, 1.0.1, zahn.sharon@mayo.edu)
+AC_INIT([CSDL],[1.0.1],[zahn.sharon@mayo.edu])
 
 #----------------------------------------------------------------
 #  Give autoconf a point of reference, and tell it that

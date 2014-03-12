@@ -19,7 +19,7 @@
 #  Declare the package name and version.
 #  All the bouquets and brickbats go to Sharon. :-)
 #----------------------------------------------------------------
-AC_INIT([CALCCAP], [1.0], [zahn.sharon@mayo.edu])
+AC_INIT([CALCCAP],[1.0],[zahn.sharon@mayo.edu])
 
 #----------------------------------------------------------------
 #  Give autoconf a point of reference, and tell it that
