@@ -14,7 +14,7 @@ AUTOMAKE_OPTIONS = foreign subdir-objects
 #---------------------------------------------------------------
 # tcl/tk scripts that may need to be installed.
 #---------------------------------------------------------------
-pkglib_SCRIPTS = \
+pkglibexec_SCRIPTS = \
 	addressDialog.tcl \
 	pkgIndex.tcl
 
@@ -22,6 +22,4 @@ pkglib_SCRIPTS = \
 #  Define an installation directory that includes
 #  the version number (from AC_INIT) like "addressDialog1.0"
 #---------------------------------------------------------------
-pkglibdir = $(libdir)/$(PACKAGE)$(PACKAGE_VERSION)
-
-
+pkglibexecdir = $(libexecdir)/$(PACKAGE)$(PACKAGE_VERSION)

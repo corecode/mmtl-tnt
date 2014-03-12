@@ -15,7 +15,7 @@
 #----------------------------------------------------------------
 
 #----------------------------------------------------------------
-#  Just for the record, this isn't a GNU project, and 
+#  Just for the record, this isn't a GNU project, and
 #  doesn't have all the support files like LICENSE and
 #  ChangeLog.  We're also compiling in a subdirectory, so
 #  we supply a couple of options to automake.
@@ -30,7 +30,7 @@ AUTOMAKE_OPTIONS = foreign
 #---------------------------------------------------------------
 # tcl/tk scripts to be installed.
 #---------------------------------------------------------------
-pkglib_SCRIPTS = \
+pkglibexec_SCRIPTS = \
 	canvas_functions.tcl \
 	gui.tcl \
 	gui_build.tcl \
@@ -48,7 +48,7 @@ pkglib_SCRIPTS = \
 #---------------------------------------------------------------
 #  Data files to be installed
 #---------------------------------------------------------------
-pkglib_DATA = \
+pkgdata_DATA = \
 	MayoSPPDGlogo.gif \
 	conductivity.list \
 	loss_tangent.list \
@@ -60,9 +60,5 @@ pkglib_DATA = \
 #  Define an installation directory that includes
 #  the version number (from AC_INIT) like "bltmath1.0"
 #---------------------------------------------------------------
-pkglibdir = $(libdir)/$(PACKAGE)$(PACKAGE_VERSION)
-
-
-
-
-
+pkglibexecdir = $(libexecdir)/$(PACKAGE)$(PACKAGE_VERSION)
+pkgdatadir = $(datadir)/$(PACKAGE)$(PACKAGE_VERSION)

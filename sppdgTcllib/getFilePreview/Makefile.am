@@ -17,7 +17,7 @@
 #----------------------------------------------------------------
 
 #----------------------------------------------------------------
-#  Just for the record, this isn't a GNU project, and 
+#  Just for the record, this isn't a GNU project, and
 #  doesn't have all the support files like LICENSE and
 #  ChangeLog.  We're also compiling in a subdirectory, so
 #  we supply a couple of options to automake.
@@ -32,7 +32,7 @@ AUTOMAKE_OPTIONS = foreign
 #---------------------------------------------------------------
 # tcl/tk scripts that may need to be installed.
 #---------------------------------------------------------------
-pkglib_SCRIPTS = \
+pkglibexec_SCRIPTS = \
 	getFilePreview.tcl \
 	pkgIndex.tcl
 
@@ -40,5 +40,4 @@ pkglib_SCRIPTS = \
 #  Define an installation directory that includes
 #  the version number (from AC_INIT) like "getFilePreview1.0"
 #---------------------------------------------------------------
-pkglibdir = $(libdir)/$(PACKAGE)$(PACKAGE_VERSION)
-
+pkglibexecdir = $(libexecdir)/$(PACKAGE)$(PACKAGE_VERSION)
