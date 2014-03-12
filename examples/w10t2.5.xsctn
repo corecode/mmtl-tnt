@@ -1,0 +1,34 @@
+#----------------------------------
+# File:  w10t2.5.xsctn
+# $Id: w10t2.5.xsctn,v 1.2 2004/07/20 17:02:41 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Buried Trapezoid Microstrip"
+set ::Stackup::couplingLength "0.040"
+set ::Stackup::riseTime "400ps"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 10
+set DSEG 27
+
+GroundPlane G1 
+DielectricLayer D1  \
+	 -thickness 17 \
+	 -lossTangent 0.10 \
+	 -permittivity 3.2
+TrapezoidConductors Trap1  \
+	 -pitch 25 \
+	 -conductivity 3.75e7siemens/meter \
+	 -bottomWidth 9 \
+	 -height 2.5 \
+	 -number 5 \
+	 -topWidth 10 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer D5  \
+	 -thickness 9 \
+	 -lossTangent 0.10 \
+	 -permittivity 3.2
+GroundPlane G2 

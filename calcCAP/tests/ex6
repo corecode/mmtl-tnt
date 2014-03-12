@@ -1,0 +1,25 @@
+2000e-6
+0.00133333333333
+439500.0
+439500.000001
+-1000e-6
+-300e-6
+1024
+40
+8
+18
+20
+5
+0.0
+1.0e-5
+2
+5
+666666.666667
+2 10 0 0 0 0 1
+DIELE 1 dieleTags1 1 -900e-6 0.0 1800e-6 600e-6 11.0 DIELE 2 dieleTags2 2 -900e-6 600e-6 1800e-6 1.5e-6 5.0
+REC 3 recTags1 1 0 600e-6 2e-6 1e-6 REC 4 recTags2 2 8e-6 600e-6 2e-6 1e-6 REC 5 recTags3 3 19e-6 600e-6 2e-6 1e-6 REC 6 recTags4 4 33e-6 600e-6 2e-6 1e-6 REC 7 recTags5 5 50e-6 600e-6 2e-6 1e-6 REC 8 recTags6 6 0 601.5e-6 2e-6 1e-6 REC 9 recTags7 7 8e-6 601.5e-6 2e-6 1e-6 REC 10 recTags8 8 19e-6 601.5e-6 2e-6 1e-6 REC 11 recTags9 9 33e-6 601.5e-6 2e-6 1e-6 REC 12 recTags10 10 50e-6 601.5e-6 2e-6 1e-6
+
+
+
+
+GND 13 gndTags1 1 -900e-6 -100e-6 1800e-6 100e-6

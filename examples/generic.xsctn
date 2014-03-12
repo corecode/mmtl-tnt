@@ -1,0 +1,39 @@
+#----------------------------------
+# File:  generic.xsctn
+# $Id: generic.xsctn,v 1.2 2004/07/20 17:02:41 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Generic Cross Section"
+set ::Stackup::couplingLength "0.100"
+set ::Stackup::riseTime "20"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 10
+set DSEG 10
+
+GroundPlane G15 
+DielectricLayer D13  \
+	 -thickness 10.57 \
+	 -lossTangent 0.001 \
+	 -permittivity 4.1
+RectangleConductors grWires  \
+	 -width 40 \
+	 -pitch 70 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 4 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0
+RectangleConductors Rect15  \
+	 -width 10 \
+	 -pitch 70 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 4 \
+	 -yOffset 0 \
+	 -xOffset 50
+DielectricLayer D15  \
+	 -thickness 8.3 \
+	 -lossTangent 0.001 \
+	 -permittivity 4

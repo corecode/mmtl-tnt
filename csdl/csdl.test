@@ -1,0 +1,514 @@
+#--------------------------------------------------------*-Tcl-*--
+#
+#  csdl.test
+#
+#  This package of tests exercises the Cross Section
+#  Description Language (CSDL) classes to ensure their
+#  functionality.
+#
+#  Tests are broken out into several categories
+#    llcsdl - low level csdl classes
+#    hlcsdl - high level csdl classes
+#    stackup - stackup class exercises
+#
+#  Source this script to run the tests.
+#
+#  Bob Techentin
+#  August 28, 2001
+#
+#  Copyright 2001-2004 Mayo Foundation.  All rights reserved.
+#  $Id: csdl.test,v 1.1 2004/02/13 21:07:27 techenti Exp $
+#
+#-----------------------------------------------------------------
+
+#-----------------------------------------------------------------
+#  Put the current directory first in the package path.
+#  (Actually, put the parent fo the current directory in
+#   the path, as csdl_shapes requires the units package,
+#   which should be in a sibling directory.)
+#-----------------------------------------------------------------
+set auto_path [concat [file join [file dirname [info script]] ..] $auto_path]
+
+
+#-----------------------------------------------------------------
+# Load the tcltest package and import the test command
+#-----------------------------------------------------------------
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+
+#-----------------------------------------------------------------
+#  Load CSDL
+#-----------------------------------------------------------------
+if {[catch {package require csdl} msg]} {
+    catch {puts stderr "Cannot load csdl package: '$msg'"}
+    return
+}
+
+
+
+#-----------------------------------------------------------------
+#  test visitor class
+#  This class can exercise the visitor capabilities of
+#  the various CSDL classes by simply recording who
+#  it is visiting.
+#-----------------------------------------------------------------
+catch {itcl::delete class test-visitor}
+itcl::class test-visitor {
+    variable result {}
+
+    set classTypes {
+	Stackup GroundPlane DielectricLayer
+	RectangleConductors TrapezoidConductors CircleConductors
+	Dielectric Conductor Ground
+	Rectangle Trapezoid Circle Layer
+    }
+
+    #  Create a visit method for each class type
+    foreach type $classTypes {
+	method visit$type {obj x y} \
+	    "lappend result \"$type \$obj \$x \$y\""
+    }
+
+    method clear {} {set result [list]}
+    method result {} {return $result}
+}
+
+
+
+#----------------------------------------------------------
+#  Shape tests
+#----------------------------------------------------------
+
+#----------------------------------------------------------
+#  Instantiation tests
+#----------------------------------------------------------
+test shape-1.0 {instantiate Shape} {
+    #  In a perfect world, this would be a pure virtual
+    #  class, and we couldn't instantiate it.
+    catch {itcl::delete object s0}
+    set obj [Shape s0]
+    itcl::delete object $obj
+    set obj
+} {s0}
+test shape-1.1 {instantiate Rectangle} {
+    catch {itcl::delete object r0}
+    set obj [Rectangle r0]
+    itcl::delete object $obj
+    set obj
+} {r0}
+test shape-1.2 {instantiate Trapezoid} {
+    catch {itcl::delete object t0}
+    set obj [Trapezoid t0]
+    itcl::delete object $obj
+    set obj
+} {t0}
+test shape-1.3 {instantiate Circle} {
+    catch {itcl::delete object c0}
+    set obj [Circle c0]
+    itcl::delete object $obj
+    set obj
+} {c0}
+test shape-1.4 {instantiate Layer} {
+    catch {itcl::delete object layer0}
+    set obj [Layer layer0]
+    itcl::delete object $obj
+    set obj
+} {layer0}
+
+
+#----------------------------------------------------------
+#  Basic Shape tests
+#
+#  This looks a little strange, but this seems like
+#  a good way to run a bunch of shape tests on
+#  different kinds of shape objects, like rectangles
+#  circles, etc.
+#
+#  The test procedures call this proc, which runs tests
+#  based on the object class argument.  All shape classes
+#  should be able to pass these basic functionality tests.
+#----------------------------------------------------------
+
+proc basic-shape-tests {objClass} {
+
+    catch {itcl::delete object obj0}
+    catch {itcl::delete object v}
+    #  First, make sure that this objClass is really
+    #  a subclass of shape
+    test shape-$objClass-1.0 "$objClass must be subclass of Shape" {
+	catch {itcl::delete object obj0}
+	$objClass obj0
+	set result [obj0 isa Shape]
+	itcl::delete object obj0
+	set result
+    } {1}
+
+    test shape-$objClass-1.1 "Define $objClass name" {
+	catch {itcl::delete object obj0}
+	$objClass obj0 -name "$objClass object"
+	set result [obj0 cget -name]
+	itcl::delete object obj0
+	set result
+    } "$objClass object"
+
+    test shape-$objClass-1.2 "Define $objClass color" {
+	catch {itcl::delete object obj0}
+	$objClass obj0 -color "green"
+	set result [obj0 cget -color]
+	itcl::delete object obj0
+	set result
+    } {green}
+
+    test shape-$objClass-1.3 "Define $objClass description" {
+	catch {itcl::delete object obj0}
+	$objClass obj0 -description "default $objClass"
+	set result [obj0 cget -description]
+	itcl::delete object obj0
+	set result
+    } "default $objClass"
+
+    test shape-$objClass-1.4 "Accept a visitor" {
+	catch {itcl::delete object v}
+	catch {itcl::delete object obj0}
+	test-visitor v
+	$objClass obj0
+	obj0 accept v 10 10
+	set result [v result]
+	itcl::delete object v obj0
+	set result
+    } "{$objClass ::obj0 10 10}"
+}
+
+
+#----------------------------------------------------------
+#  Rectangle tests
+#----------------------------------------------------------
+
+basic-shape-tests Rectangle
+
+
+test shape-2.1 {Rectangle with height and width} {
+    catch {itcl::delete object r0}
+    set obj [Rectangle r0 -width 10 -height 10]
+    itcl::delete object $obj
+    set obj
+} {r0}
+
+test shape-2.2 {Rectangle with width units} {
+    catch {itcl::delete object r0}
+    set obj [Rectangle r0 -width 20micron]
+    itcl::delete object $obj
+    set obj
+} {r0}
+
+test shape-2.3 {Rectangle with height units} {
+    catch {itcl::delete object r0}
+    set obj [Rectangle r0 -height 20micron]
+    itcl::delete object $obj
+    set obj
+} {r0}
+
+test shape-2.4 {Rectangle with invalid width} {
+    catch {itcl::delete object r0}
+    catch {Rectangle r0 -width 10seconds} result
+    set result
+} {Invalid Dimension 'width':  '10seconds' and 'meter' have incompatible units}
+
+test shape-2.5 {Rectangle with invalid height} {
+    catch {itcl::delete object r0}
+    catch {Rectangle r0 -height 10seconds} result
+    set result
+} {Invalid Dimension 'height':  '10seconds' and 'meter' have incompatible units}
+
+test shape-2.6 {Rectangle width conversion} {
+    catch {itcl::delete object r0}
+    Rectangle r0 -width 20micron
+    set result [expr {[r0 width] == 2e-5}]
+    itcl::delete object r0
+    set result
+} {1}
+
+test shape-2.7 {Rectangle height conversion} {
+    catch {itcl::delete object r0}
+    Rectangle r0 -height 20micron
+    set result [expr {[r0 height] == 2e-5}]
+    itcl::delete object r0
+    set result
+} {1}
+
+test shape-2.8 {Rectangle area} {
+    catch {itcl::delete object r0}
+    Rectangle r0 -height 20 -width 10
+    set result [expr {[r0 area] == 200}]
+    itcl::delete object r0
+    set result
+} {1}
+
+test shape-2.9 {Rectangle area conversion} {
+    catch {itcl::delete object r0}
+    Rectangle r0 -height 20mm -width 10mm
+    set result [expr {[r0 area] == 2e-4}]
+    itcl::delete object r0
+    set result
+} {1}
+
+test shape-2.10 {Rectangle circumference} {
+    catch {itcl::delete object r0}
+    Rectangle r0 -height 20 -width 10
+    set result [expr {[r0 circumference] == 60}]
+    itcl::delete object r0
+    set result
+} {1}
+
+test shape-2.11 {Rectangle circumference conversion} {
+    catch {itcl::delete object r0}
+    Rectangle r0 -height 20mm -width 10mm
+    set result [expr {[r0 circumference] == 0.06}]
+    itcl::delete object r0
+    set result
+} {1}
+
+
+
+#----------------------------------------------------------
+#  Trapezoid tests
+#----------------------------------------------------------
+
+basic-shape-tests Trapezoid
+
+test shape-3.1 {Trapezoid with height and widths} {
+    catch {itcl::delete object t0}
+    set obj [Trapezoid t0 -topWidth 10 -bottomWidth 15 -height 10]
+    itcl::delete object $obj
+    set obj
+} {t0}
+
+test shape-3.2 {Trapezoid with top width units} {
+    catch {itcl::delete object t0}
+    set obj [Trapezoid t0 -topWidth 20micron]
+    itcl::delete object $obj
+    set obj
+} {t0}
+
+test shape-3.3 {Trapezoid with bottom width units} {
+    catch {itcl::delete object t0}
+    set obj [Trapezoid t0 -bottomWidth 20micron]
+    itcl::delete object $obj
+    set obj
+} {t0}
+
+test shape-3.4 {Trapezoid with height units} {
+    catch {itcl::delete object t0}
+    set obj [Trapezoid t0 -height 20micron]
+    itcl::delete object $obj
+    set obj
+} {t0}
+
+test shape-3.5 {Trapezoid with invalid top width} {
+    catch {itcl::delete object t0}
+    catch {Trapezoid t0 -topWidth 10seconds} result
+    set result
+} {Invalid Dimension 'top width':  '10seconds' and 'meter' have incompatible units}
+
+test shape-3.6 {Trapezoid with invalid bottom width} {
+    catch {itcl::delete object t0}
+    catch {Trapezoid t0 -bottomWidth 10seconds} result
+    set result
+} {Invalid Dimension 'bottom width':  '10seconds' and 'meter' have incompatible units}
+
+test shape-3.7 {Trapezoid with invalid height} {
+    catch {itcl::delete object t0}
+    catch {Trapezoid t0 -height 10seconds} result
+    set result
+} {Invalid Dimension 'height':  '10seconds' and 'meter' have incompatible units}
+
+test shape-3.8 {Trapezoid top width conversion} {
+    catch {itcl::delete object t0}
+    Trapezoid t0 -topWidth 20micron -bottomWidth 10micron
+    set result [expr {[t0 width] == 2e-5}]
+    itcl::delete object t0
+    set result
+} {1}
+
+test shape-3.9 {Trapezoid height conversion} {
+    catch {itcl::delete object t0}
+    Trapezoid t0 -height 20micron
+    set result [expr {[t0 height] == 2e-5}]
+    itcl::delete object t0
+    set result
+} {1}
+
+test shape-3.10 {Trapezoid area} {
+    catch {itcl::delete object t0}
+    Trapezoid t0 -height 10 -bottomWidth 30 -topWidth 20
+    set result [expr {[t0 area] == 250}]
+    itcl::delete object t0
+    set result
+} {1}
+
+test shape-3.11 {Trapezoid area conversion} {
+    catch {itcl::delete object t0}
+    Trapezoid t0 -height 10cm -bottomWidth 30cm -topWidth 20cm
+    set result [expr {[t0 area] == 250e-4}]
+    itcl::delete object t0
+    set result
+} {1}
+
+test shape-3.12 {Trapezoid circumference} {
+    catch {itcl::delete object t0}
+    Trapezoid t0 -height 3 -bottomWidth 18 -topWidth 10
+    set result [expr {[t0 circumference] == 38}]
+    itcl::delete object t0
+    set result
+} {1}
+
+test shape-3.13 {Trapezoid circumference conversion} {
+    catch {itcl::delete object t0}
+    Trapezoid t0 -height 3cm -bottomWidth 18cm -topWidth 10cm
+    set result [expr {[t0 circumference] == 38e-2}]
+    itcl::delete object t0
+    set result
+} {1}
+
+
+
+#----------------------------------------------------------
+#  Circle tests
+#----------------------------------------------------------
+
+basic-shape-tests Circle
+
+test shape-4.1 {Circle with diameter} {
+    catch {itcl::delete object c0}
+    set obj [Circle c0 -diameter 10]
+    itcl::delete object $obj
+    set obj
+} {c0}
+
+test shape-4.2 {Circle with diameter units} {
+    catch {itcl::delete object c0}
+    set obj [Circle c0 -diameter 20micron]
+    itcl::delete object $obj
+    set obj
+} {c0}
+
+test shape-4.3 {Circle with invalid diameter} {
+    catch {itcl::delete object c0}
+    catch {Circle c0 -diameter 10seconds} result
+    set result
+} {Invalid Dimension 'diameter':  '10seconds' and 'meter' have incompatible units}
+
+test shape-4.4 {Circle width conversion} {
+    catch {itcl::delete object c0}
+    Circle c0 -diameter 20micron
+    set result [expr {[c0 width] == 2e-5}]
+    itcl::delete object c0
+    set result
+} {1}
+
+test shape-4.5 {Circle height conversion} {
+    catch {itcl::delete object c0}
+    Circle c0 -diameter 20micron
+    set result [expr {[c0 height] == 2e-5}]
+    itcl::delete object c0
+    set result
+} {1}
+
+test shape-4.6 {Circle area} {
+    catch {itcl::delete object c0}
+    Circle c0 -diameter 10
+    set result [expr {[c0 area] - 78.5398163397 < 1e-7}]
+    itcl::delete object c0
+    set result
+} {1}
+
+test shape-4.7 {Circle area conversion} {
+    catch {itcl::delete object c0}
+    Circle c0 -diameter 10cm
+    set result [expr {[c0 area] - 0.00785398163397 < 1e-12}]
+    itcl::delete object c0
+    set result
+} {1}
+
+test shape-4.8 {Circle circumference} {
+    catch {itcl::delete object c0}
+    Circle c0 -diameter 10
+    set result [expr {[c0 circumference] - 31.415926535 < 1e-8}]
+    itcl::delete object c0
+    set result
+} {1}
+
+test shape-4.9 {Circle circumference conversion} {
+    catch {itcl::delete object c0}
+    Circle c0 -diameter 10cm
+    set result [expr {[c0 circumference] - 0.31415926535 < 1e-10}]
+    itcl::delete object c0
+    set result
+} {1}
+
+
+#----------------------------------------------------------
+#  Layer tests
+#----------------------------------------------------------
+
+basic-shape-tests Layer
+
+test shape-5.1 {Layer with thickness} {
+    catch {itcl::delete object layer0}
+    set obj [Layer layer0 -thickness 10]
+    itcl::delete object $obj
+    set obj
+} {layer0}
+
+test shape-5.2 {Layer with thickness units} {
+    catch {itcl::delete object layer0}
+    set obj [Layer layer0 -thickness 20micron]
+    itcl::delete object $obj
+    set obj
+} {layer0}
+
+test shape-5.3 {Layer with invalid thickness} {
+    catch {itcl::delete object layer0}
+    catch {Layer layer0 -thickness 10seconds} result
+    set result
+} {Invalid Dimension 'thickness':  '10seconds' and 'meter' have incompatible units}
+
+test shape-5.4 {Layer width conversion} {
+    catch {itcl::delete object layer0}
+    Layer layer0 -thickness 20micron
+    set result [expr {[layer0 width] == 4e-5}]
+    itcl::delete object layer0
+    set result
+} {1}
+
+test shape-5.5 {Layer height conversion} {
+    catch {itcl::delete object layer0}
+    Layer layer0 -thickness 20micron
+    set result [expr {[layer0 height] == 2e-5}]
+    itcl::delete object layer0
+    set result
+} {1}
+
+
+
+
+
+
+#----------------------------------------------------------
+#  Instantiation Tests - make sure the classes exist
+#----------------------------------------------------------
+
+test llcsdl-1.0 {instantiate Dielectric} {
+    set obj [Dielectric dielectric0 -shape [Layer layer0 -thickness 10]]
+    itcl::delete object dielectric0 layer0
+    set obj
+} {dielectric0}
+
+
+
+::tcltest::cleanupTests
+
+

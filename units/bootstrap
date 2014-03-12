@@ -1,0 +1,26 @@
+#! /bin/sh
+#
+#  bootstrap
+#
+#  Short script to create basic autoconf/automake configuration
+#  files.  Useful when freshly checking out the source tree.
+#
+#  Copyright 2002-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: bootstrap,v 1.4 2004/02/05 22:24:23 techenti Exp $
+
+echo "Clearing all cached configuration files"
+rm -rf autom4te.cache aclocal.m4
+rm -f config.* configure
+rm -f Makefile.in depcomp install-sh missing mkinstalldirs
+
+echo "Running aclocal"
+aclocal
+
+echo "Running automake"
+automake --add-missing --copy --force-missing
+
+echo "Running autoconf"
+autoconf
+
+
+

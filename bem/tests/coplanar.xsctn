@@ -1,0 +1,35 @@
+#----------------------------------
+# File:  /users/zahn/lib/bem/tests/coplanar.xsctn
+# Fri Sep 27 07:47:37 DST 2002
+#----------------------------------
+
+package require csdl
+
+set _title "Duplicate of coplanar.xsctn"
+set ::Stackup::couplingLength "1000mils"
+set ::Stackup::riseTime "25"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 45
+set DSEG 45
+
+GroundPlane G3 
+DielectricLayer D1  \
+	 -thickness 9.8 \
+	 -lossTangent 0.0002 \
+	 -permittivity 20
+RectangleConductors grWires  \
+	 -width 4.5 \
+	 -pitch 12 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 0.2 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0
+RectangleConductors Rect4  \
+	 -width 4.5 \
+	 -pitch 12 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 0.2 \
+	 -yOffset 0 \
+	 -xOffset 6

@@ -1,0 +1,42 @@
+
+2001 03 12 14:40:01 zahn NMMTL_2DLF
+
+Node = test:opal2_mediumline
+Number of Signal Lines =   1
+Number of Ground Lines, including top ground plane =   0
+Coupling Length =   0.04201 meters
+Rise Time =    60.0000 picoseconds
+Contour (conductor) segments [cseg] = 10
+Ground Plane/Dielectric segments [dseg] = 15
+Note: minimum frequency for surface current assumptions is 2636 MHz.
+Mutual and Self Electrostatic Induction:
+B(Active Signal , Passive Signal) Farads/Meter
+B( signal1 , signal1 )=   1.0285617e-10
+
+Mutual and Self Inductance:
+L(Active Signal , Passive Signal) Henrys/Meter
+L( signal1 , signal1 )=   2.7763409e-07
+
+Characteristic Impedance (Ohms):
+For Signal Line signal1= 51.9543
+
+Effective Dielectric Constant:
+For Signal Line signal1= 2.57007
+
+Propagation Velocity (meters/second):
+For Signal Line signal1=   1.8700272e+08
+
+Propagation Delay (seconds/meter):
+For Signal Line signal1=   5.3475158e-09
+
+Rdc:
+Rdc(Active Signal , Passive Signal) Ohms/Meter
+Rdc( signal1 , signal1 )=   3.0601327e+00
+
+Far-End (Forward) Cross Talk:
+FXT(Active Signal, Passive Signal)
+
+Near-End (Backward) Cross Talk:
+BXT(Active Signal, Passive Signal)
+
+NOTE: Cross talk results assume there are no reflections.

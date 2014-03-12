@@ -1,0 +1,34 @@
+#----------------------------------
+# File:  /users/techenti/swdev/tnt/examples/example-microstrip-2TMP.xsctn
+# Mon Jun 28 12:11:24 CDT 2004
+#----------------------------------
+
+package require csdl
+
+set _title "Two Conductor Microstrip Example"
+set ::Stackup::couplingLength "1e-07"
+set ::Stackup::riseTime "250"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 10
+set DSEG 10
+
+GroundPlane ground  \
+	 -thickness 0.0 \
+	 -yOffset 0.0 \
+	 -xOffset 0.0
+DielectricLayer fr4  \
+	 -thickness 50000000.0 \
+	 -lossTangent 0.0 \
+	 -permittivity 4.7 \
+	 -permeability 1.0 \
+	 -yOffset 0.0 \
+	 -xOffset 0.0
+RectangleConductors c1  \
+	 -width 12000000.0 \
+	 -pitch 20 \
+	 -conductivity 5.0siemens/meter \
+	 -height 3 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0

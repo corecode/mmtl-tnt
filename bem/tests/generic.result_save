@@ -1,0 +1,42 @@
+
+2002 06 11 14:45:51 daniel NMMTL_2DLF
+
+Node = TestMagicad:generic
+Number of Signal Lines =   1
+Number of Ground Lines, including top ground plane =   2
+Coupling Length =   0.01000 meters
+Rise Time =    20.0000 picoseconds
+Contour (conductor) segments [cseg] = 90
+Ground Plane/Dielectric segments [dseg] = 90
+Note: minimum frequency for surface current assumptions is 52772 MHz.
+Mutual and Self Electrostatic Induction:
+B(Active Signal , Passive Signal) Farads/Meter
+B( signal2 , signal2 )=   1.3125821e-10
+
+Mutual and Self Inductance:
+L(Active Signal , Passive Signal) Henrys/Meter
+L( signal2 , signal2 )=   3.0472359e-07
+
+Characteristic Impedance (Ohms):
+For Signal Line signal2= 48.1826
+
+Effective Dielectric Constant:
+For Signal Line signal2= 3.59977
+
+Propagation Velocity (meters/second):
+For Signal Line signal2=   1.5800952e+08
+
+Propagation Delay (seconds/meter):
+For Signal Line signal2=   6.3287326e-09
+
+Rdc:
+Rdc(Active Signal , Passive Signal) Ohms/Meter
+Rdc( signal2 , signal2 )=   8.3333337e+02
+
+Far-End (Forward) Cross Talk:
+FXT(Active Signal, Passive Signal)
+
+Near-End (Backward) Cross Talk:
+BXT(Active Signal, Passive Signal)
+
+NOTE: Cross talk results assume there are no reflections.

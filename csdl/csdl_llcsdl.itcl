@@ -1,0 +1,102 @@
+# ----------------------------------------------------------*-Tcl-*-
+#
+#  stackup.itcl
+#
+#  These Incr Tcl classes define the layer stackup and structures
+#  in a transmission line cross section.
+#
+#  Bob Techentin
+#  January 23, 2000
+#
+#  Copyright 2000-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: csdl_llcsdl.itcl,v 1.3 2004/02/09 18:56:01 techenti Exp $
+#
+# --------------------------------------------------------------------
+
+package require Itcl
+
+package provide csdl 1.0.1
+
+# --------------------------------------------------------------------
+#
+# itcl::class Structure
+#
+#     Abstract physical structure in a transmission line
+#     cross section layer Stackup.  These structures are
+#     intimately tied to the layer Stackup, and automatically
+#     add themselves to the Sackup's structureList when
+#     they are constructed.
+#
+#     Each structure also has a shape, and passes several
+#     methods through to its shape.
+#
+# options
+#
+#  -x -y
+#     X and Y offset for the structure.  In the context of
+#     the layer stackup, this is offset from (0,0) of the
+#     previous layer.
+#
+#  -shape
+#     Reference to the Shape of this structure.
+#
+# methods
+#
+#  width, height
+#     Compute the size of the structure.  
+#
+#  draw, annotate
+#     Draw and annotate the structure on the canvas.
+#
+# --------------------------------------------------------------------
+itcl::class Structure {
+    public variable x 0
+    public variable y 0
+    public variable shape
+    public variable description
+    method width {} {$shape width}
+    method height {} {$shape height}
+    method accept { visitor x y } {
+	#  Cleverly call a visitor based on our class name
+	scan [info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+
+	#  Navigate to the structure(s)
+	foreach obj $shape {
+	    $obj accept $visitor $x $y
+	}
+    }
+}
+
+
+itcl::class Dielectric {
+    inherit Structure
+    public variable permittivity 1.0
+    public variable permeability 1.0
+    public variable lossTangent 0.0
+    constructor {args} {
+	eval configure $args
+	$shape configure -color green \
+		-description "econst=$permittivity"
+    }
+}
+
+itcl::class Conductor {
+    inherit Structure
+    public variable conductivity ""
+    constructor {args} {
+	eval configure $args
+	$shape configure -color yellow \
+		-description "cond=$conductivity"
+    }
+}
+
+itcl::class Ground {
+    inherit Structure
+    constructor {args} {
+	eval configure $args
+	$shape configure -description "Ground" -color blue
+    }
+}
+
+

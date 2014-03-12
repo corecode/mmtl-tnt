@@ -1,0 +1,78 @@
+
+1999 10 21 11:02:21 daniel NMMTL_2DLF
+
+Node = TestMagicad:trap_test
+Number of Signal Lines =   2
+Number of Ground Lines, including top ground plane =   1
+Coupling Length =   0.02540 meters
+Rise Time =    25.0000 picoseconds
+Contour (conductor) segments [cseg] = 45
+Ground Plane/Dielectric segments [dseg] = 45
+Note: minimum frequency for surface current assumptions is 1309 MHz.
+Mutual and Self Electrostatic Induction:
+B(Active Signal , Passive Signal) Farads/Meter
+B( signal1 , signal1 )=   1.1523595e-10
+B( signal1 , signal2 )=  -3.8479849e-12
+B( signal2 , signal1 )=  -3.8482377e-12
+B( signal2 , signal2 )=   1.1523599e-10
+
+Mutual and Self Inductance:
+L(Active Signal , Passive Signal) Henrys/Meter
+L( signal1 , signal1 )=   3.8611270e-07
+L( signal1 , signal2 )=   1.2893159e-08
+L( signal2 , signal1 )=   1.2894004e-08
+L( signal2 , signal2 )=   3.8611253e-07
+
+Asymmetry Ratios:
+
+  Asymmetry ratio for inductance matrix:
+     0.006558% (max), 0.006558% (average)
+
+  Asymmetry ratio for electrostatic induction matrix:
+     0.006571% (max), 0.006571% (average).
+
+
+Characteristic Impedance (Ohms):
+For Signal Line signal1= 57.8846
+For Signal Line signal2= 57.8846
+
+Characteristic Impedance Odd/Even (Ohms):
+  odd= 55.9829
+ even= 59.8509
+
+Effective Dielectric Constant:
+For Signal Line signal1= 4
+For Signal Line signal2= 4
+
+Propagation Velocity (meters/second):
+For Signal Line signal1=   1.4989626e+08
+For Signal Line signal2=   1.4989626e+08
+
+Propagation Velocity Odd/Even (meters/second):
+  odd= 1.5e+08
+ even= 1.5e+08
+
+Propagation Delay (seconds/meter):
+For Signal Line signal1=   6.6712807e-09
+For Signal Line signal2=   6.6712807e-09
+
+Propagation Delay Odd/Even (seconds/meter):
+  odd= 6.66667e-09
+ even= 6.66667e-09
+
+Rdc:
+Rdc(Active Signal , Passive Signal) Ohms/Meter
+Rdc( signal1 , signal1 )=   1.0763943e+01
+Rdc( signal1 , signal2 )=   0.0000000e+00
+Rdc( signal2 , signal1 )=   0.0000000e+00
+Rdc( signal2 , signal2 )=   1.0763968e+01
+
+Far-End (Forward) Cross Talk:
+FXT(Active Signal, Passive Signal)
+FXT( signal1 , signal2 )= 0.00000e+00 = infinite dB
+
+Near-End (Backward) Cross Talk:
+BXT(Active Signal, Passive Signal)
+BXT( signal1 , signal2 )= 1.66972e-02 =   -35.54712 dB
+
+NOTE: Cross talk results assume there are no reflections.

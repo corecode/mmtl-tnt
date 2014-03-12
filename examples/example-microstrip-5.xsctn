@@ -1,0 +1,27 @@
+#----------------------------------
+# File:  example-microstrip-5.xsctn
+# $Id: example-microstrip-5.xsctn,v 1.2 2004/07/20 17:02:41 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Example Five Conductor Microstrip"
+set ::Stackup::couplingLength "0.10"
+set ::Stackup::riseTime "400"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 10
+set DSEG 10
+
+GroundPlane ground 
+DielectricLayer fr4  \
+	 -thickness 50 \
+	 -permittivity 4.7
+RectangleConductors c1  \
+	 -width 12 \
+	 -pitch 20 \
+	 -conductivity 5.0siemens/meter \
+	 -height 3 \
+	 -number 5 \
+	 -yOffset 0 \
+	 -xOffset 0

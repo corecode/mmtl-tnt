@@ -1,0 +1,21 @@
+#! /bin/sh
+#------------------------------------------------------------
+#
+#  tnt
+#
+#  TNT Transmission Line Analysis Tool suite
+#
+#  Main program - initial script.
+#  This script acts as a front end to tnt.tcl.
+#
+#  Copyright (C) Mayo Foundation.  All Rights Reserved.
+#
+#  $Id: tnt,v 1.1 2004/07/21 16:32:26 techenti Exp $
+#
+#------------------------------------------------------------
+# Restart using wish  \
+exec wish "$0" ${1+"$@"}
+
+source [file join [file dirname [info script]] tnt.tcl]
+
+

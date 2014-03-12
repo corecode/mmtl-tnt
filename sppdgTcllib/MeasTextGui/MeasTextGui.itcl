@@ -1,0 +1,934 @@
+#---------------------------------------------------------------------
+#
+#
+# MeasTextGui.itcl
+#
+#  Graphical interface for lab applications using
+#  SPPDG *measure.txt files.  
+#
+#  This is a incrTcl mega-wiget.  It is completely contained within
+#  a single frame; which can be placed inside a larger user-interface,
+#  placed into a toplevel window, or placed inside the frame of a
+#  dialog widget.
+#
+#  This class is derived from the MeasText incrTcl class.
+#  MeasTextGui only provides the graphical interface, all the
+#  parsing work, and all the data is contained in the base class.
+#
+#
+#  Eric Amundsen
+#  May 28, 2004
+#
+#  Copyright 2004 Mayo Foundation.  All rights reserved.
+#
+#
+# $Id: MeasTextGui.itcl,v 1.5 2004/06/22 18:11:17 amundsen Exp $
+#
+#---------------------------------------------------------------------
+package provide MeasTextGui 1.0
+
+package require MeasText 1.0
+package require Tk
+package require Itcl
+package require Itk
+package require Iwidgets
+package require BWidget
+package require fileutil
+
+# option database stolen from Bob Techentin's tnt package
+if { [tk windowingsystem] == "x11" } {
+	set highlightbg "#316AC5" ; # SystemHighlight
+	set highlightfg "white"   ; # SystemHighlightText
+	set bg          "white"   ; # SystemWindow
+	set fg          "black"   ; # SystemWindowText
+
+	## Fonts
+	##
+	set size	-12
+	set family	Helvetica
+	set fsize	-12
+	set ffamily	Courier
+
+
+	font create ASfont      -size $size -family $family
+	font create ASfontBold  -size $size -family $family -weight bold
+	font create ASfontFixed -size $fsize -family $ffamily
+	for {set i -2} {$i <= 4} {incr i} {
+	    set isize  [expr {$size + ($i * (($size > 0) ? 1 : -1))}]
+	    set ifsize [expr {$fsize + ($i * (($fsize > 0) ? 1 : -1))}]
+	    font create ASfont$i      -size $isize -family $family
+	    font create ASfontBold$i  -size $isize -family $family -weight bold
+	    font create ASfontFixed$i -size $ifsize -family $ffamily
+	}
+
+	#---------------------------------------------------------------
+	#  Check for CDE - which overrides options at userDefault level.
+	#  Note that the CDE package at http://wiki.tcl.tk/cde has
+	#  a much more complex (and probably more correct) way to
+	#  determine if CDE is running - but this works for Mayo SPPDG.
+	#---------------------------------------------------------------
+	if { [info exists ::env(DTUSERSESSION)] } {
+	    set priority userDefault
+	    option add *background #d9d9d9 $priority
+	} else {
+	    set priority widgetDefault
+	}
+
+	option add *Text.font		ASfontFixed $priority
+	option add *Button.font		ASfont $priority
+	option add *Canvas.font		ASfont $priority
+	option add *Checkbutton.font	ASfont $priority
+	option add *Entry.font		ASfont $priority
+	option add *Label.font		ASfont $priority
+	option add *Labelframe.font	ASfont $priority
+	option add *Listbox.font	ASfont $priority
+	option add *Menu.font		ASfont $priority
+	option add *Menubutton.font	ASfont $priority
+	option add *Message.font	ASfont $priority
+	option add *Radiobutton.font	ASfont $priority
+	option add *Spinbox.font	ASfont $priority
+
+	option add *Table.font		ASfont $priority
+	option add *TreeCtrl*font	ASfont $priority
+	## Misc
+	##
+	option add *ScrolledWindow.ipad		0 $priority
+
+	## Listbox
+	##
+	option add *Listbox.background		$bg $priority
+	option add *Listbox.foreground		$fg $priority
+	option add *Listbox.selectBorderWidth	0 $priority
+	option add *Listbox.selectForeground	$highlightfg $priority
+	option add *Listbox.selectBackground	$highlightbg $priority
+	option add *Listbox.activeStyle		dotbox $priority
+
+	## Button
+	##
+	option add *Button.padX			1 $priority
+	option add *Button.padY			2 $priority
+
+	## Entry
+	##
+	option add *Entry.background		$bg $priority
+	option add *Entry.foreground		$fg $priority
+	option add *Entry.selectBorderWidth	0 $priority
+	option add *Entry.selectForeground	$highlightfg $priority
+	option add *Entry.selectBackground	$highlightbg $priority
+	option add *Entryfield.background		$bg $priority
+	option add *Entryfield.textBackground		$bg $priority
+	option add *Entryfield.foreground		$fg $priority
+	option add *Entryfield.selectBorderWidth	0 $priority
+	option add *Entryfield.selectForeground	$highlightfg $priority
+	option add *Entryfield.selectBackground	$highlightbg $priority
+
+	## Spinbox
+	##
+	option add *Spinbox.background		$bg $priority
+	option add *Spinbox.foreground		$fg $priority
+	option add *Spinbox.selectBorderWidth	0 $priority
+	option add *Spinbox.selectForeground	$highlightfg $priority
+	option add *Spinbox.selectBackground	$highlightbg $priority
+
+
+	## Text
+	##
+	option add *Text.background		$bg $priority
+	option add *Text.foreground		$fg $priority
+	option add *Text.selectBorderWidth	0 $priority
+	option add *Text.selectForeground	$highlightfg $priority
+	option add *Text.selectBackground	$highlightbg $priority
+
+	option add *Scrolledtext.background		$bg $priority
+	option add *Scrolledtext.foreground		$fg $priority
+	option add *Scrolledtext.selectBorderWidth	0 $priority
+	option add *Scrolledtext.selectForeground	$highlightfg $priority
+	option add *Scrolledtext.selectBackground	$highlightbg $priority
+
+	## Menu
+	##
+	option add *Menu.activeBackground	$highlightbg $priority
+	option add *Menu.activeForeground	$highlightfg $priority
+	option add *Menu.activeBorderWidth	0 $priority
+	option add *Menu.highlightThickness	0 $priority
+	option add *Menu.borderWidth		1 $priority
+
+	## Menubutton
+	##
+	option add *Menubutton.activeBackground	$highlightbg $priority
+	option add *Menubutton.activeForeground	$highlightfg $priority
+	option add *Menubutton.activeBorderWidth	0 $priority
+	option add *Menubutton.highlightThickness	0 $priority
+	option add *Menubutton.borderWidth		0 $priority
+	option add *Menubutton*padX			4 $priority
+	option add *Menubutton*padY			2 $priority
+
+	## Scrollbar
+	##
+	option add *Scrollbar.width		12 $priority
+	option add *Scrollbar.troughColor	#bdb6ad $priority
+	option add *Scrollbar.borderWidth		1 $priority
+	option add *Scrollbar.highlightThickness	0 $priority
+
+	## PanedWindow
+
+	##
+	option add *Panedwindow.borderWidth		0 $priority
+	option add *Panedwindow.sashwidth		3 $priority
+	option add *Panedwindow.showhandle		0 $priority
+	option add *Panedwindow.sashpad		0 $priority
+	option add *Panedwindow.sashrelief		flat $priority
+	option add *Panedwindow.relief		flat $priority
+
+}
+
+# need this to get around a bug in Iwidgets with using a BWidget
+# megawidget in an Itk megawidget
+itk::usual ComboBox {}
+itk::usual Tree {}
+
+
+#  +-Class Name-------------------------------------------------------+
+#  |
+#  | itcl::class MeasTextGui
+#  |
+#  +-Base Classes-----------------------------------------------------+
+#  |
+#  | itk::Widget
+#  | MeasText
+#  |
+#  +-Attributes-------------------------------------------------------+
+#  |
+#  | Public:
+#  |
+#  | Private:
+#  |  browseIcon
+#  |  pickFromListIcon
+#  |  designTree
+#  |  designTreeIndex
+#  |  result
+#  |  pathsFilename
+#  |  designTreeMeasTextList
+#  |
+#  +-Methods----------------------------------------------------------+
+#  |
+#  | Public:
+#  |  constructor
+#  |  destructor
+#  |
+#  | Private:
+#  |  browseMeasButtonCallback
+#  |  parseMeasFilename
+#  |  comboBoxCallback
+#  |  notesCallback
+#  |  measListDialogOKCallback
+#  |  buildMeasListDialog
+#  |  closeMeasListDialog
+#  |  pickMeasListButtonCallback
+#  |  scanCallback
+#  |  scanDesignTree
+#  |  scanningDesignTree
+#  |  updateScanningProgress
+#  |
+#  +------------------------------------------------------------------+
+itcl::class MeasTextGui {
+	inherit itk::Widget MeasText
+
+	public {
+		method constructor {args}
+	}
+
+	private {
+		method browseMeasButtonCallback {}
+		method parseMeasFilename {}
+		method comboBoxCallback {}
+		method notesCallback {textWidget baseClassNotes}
+		method measListDialogOKCallback {args}
+		method buildMeasListDialog {}
+		method closeMeasListDialog {}
+		method pickMeasListButtonCallback {}
+		method scanCallback {}
+		method scanDesignTree {}
+		method scanningDesignTree {}
+		method updateScanningProgress {}
+
+	}
+
+	private {
+		variable designTree [list]
+		variable designTreeIndex 1
+		variable result 0
+		variable pathsFilename {//sppdgfs/lab/lib/paths/paths.txt}
+		variable designTreeMeasTextList [list]
+		variable pathArray
+		variable browseIcon
+		variable pickFromListIcon
+	}
+}
+
+#  +-Public Method----------------------------------------------------+
+#  |
+#  | MeasTextGui::constructor
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Construct the GUI
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  | args - options list, passed down to itk::Widget
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  | an instance of the GUI contained within a frame
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::constructor {args} {
+	array set pathArray [list]
+
+	image create photo browseIcon -data {
+		R0lGODlhEAAQAIMAAPwCBASCBMyaBPzynPz6nJxmBPzunPz2nPz+nPzSBPzq
+		nPzmnPzinPzenAAAAAAAACH5BAEAAAAALAAAAAAQABAAAARTEMhJq724hp1n
+		8MDXeaJgYtsnDANhvkJRCcZxEEiOJDIlKLWDbtebCBaGGmwZEzCQKxxCSgQ4
+		Gb/BbciTCBpOoFbX9X6fChYhUZYU3vB4cXTxRwAAIf5oQ3JlYXRlZCBieSBC
+		TVBUb0dJRiBQcm8gdmVyc2lvbiAyLjUNCqkgRGV2ZWxDb3IgMTk5NywxOTk4
+		LiBBbGwgcmlnaHRzIHJlc2VydmVkLg0KaHR0cDovL3d3dy5kZXZlbGNvci5j
+		b20AOw==
+	}
+
+	image create photo pickFromListIcon -data {
+		R0lGODlhEAAQAIMAAAQCBPwCBAQC/AQCjPz+/KSipPzerMRaBEQCBAAAAAAA
+		AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQABAAAARDEMhJaQhA6D1E
+		/wDGeeRgDhOhruyatjBRSIRxxOsMEAdC0BUZDcfSEYvDo3Bn++2Cxt7RqFxW
+		hZiCdsvdhjCVsMQfAQAh/mhDcmVhdGVkIGJ5IEJNUFRvR0lGIFBybyB2ZXJz
+		aW9uIDIuNQ0KqSBEZXZlbENvciAxOTk3LDE5OTguIEFsbCByaWdodHMgcmVz
+		ZXJ2ZWQuDQpodHRwOi8vd3d3LmRldmVsY29yLmNvbQA7
+	}
+
+	# and make it always expand to fill its container
+	grid columnconfigure $itk_interior 0 -weight 1
+	grid rowconfigure $itk_interior 0 -weight 1
+
+	# create a frame for the measure.txt filename and associated widgets
+	itk_component add measureTxtFilenameFrame {
+		frame $itk_interior.measureTxtFilenameFrame	\
+			-padx 2 -pady 2 -borderwidth 3 -relief raised
+	}
+
+	# create widgets for measure.txt filename and browsing
+	itk_component add pickMeasListButton {
+		button $itk_component(measureTxtFilenameFrame).pickMeasListButton	\
+			-command [itcl::code $this pickMeasListButtonCallback]	\
+			-image pickFromListIcon	\
+			-highlightthickness 0	\
+			-takefocus 0	\
+			-relief flat \
+			-borderwidth 1	\
+			-padx 1	\
+			-pady 1
+	}
+	itk_component add browseMeasButton {
+		button $itk_component(measureTxtFilenameFrame).browseMeasButton	\
+			-command [itcl::code $this browseMeasButtonCallback]	\
+			-image browseIcon	\
+			-highlightthickness 0	\
+			-takefocus 0	\
+			-relief flat \
+			-borderwidth 1	\
+			-padx 1	\
+			-pady 1
+	}
+
+	# and give them balloon help
+	DynamicHelp::register $itk_component(pickMeasListButton)	\
+		balloon "Pick a measure.txt file from list"
+    DynamicHelp::register $itk_component(browseMeasButton)	\
+		balloon "Browse for a measure.txt file"
+
+	itk_component add measFilenameEntry {
+		iwidgets::entryfield $itk_component(measureTxtFilenameFrame).measFilenameEntry	\
+			-command [itcl::code $this parseMeasFilename]	\
+			-textvariable [itcl::scope measFilename]
+	}
+
+	grid $itk_component(pickMeasListButton)	\
+		-column 0 -row 0
+	grid $itk_component(browseMeasButton)	\
+		-column 1 -row 0
+	grid $itk_component(measFilenameEntry)	\
+		-column 2 -row 0 -sticky ew
+	grid rowconfigure		$itk_component(measureTxtFilenameFrame) 0 -weight 0
+	grid columnconfigure	$itk_component(measureTxtFilenameFrame) 0 -weight 0
+	grid columnconfigure	$itk_component(measureTxtFilenameFrame) 1 -weight 0
+	grid columnconfigure	$itk_component(measureTxtFilenameFrame) 2 -weight 1
+
+
+	# create a frame for test number vendor and serial number
+	itk_component add numVendSNFrame {
+		frame $itk_interior.numVendSNFrame	\
+			-padx 2 -pady 2 -borderwidth 3 -relief raised
+	}
+
+	# create widgets for test number vendor and serial number
+	itk_component add testNumLabel {
+		label $itk_component(numVendSNFrame).testNumComboLabel -text {Test Number}
+	}
+	itk_component add testNumComboBox {
+		ComboBox $itk_component(numVendSNFrame).testNumComboBox	\
+			-modifycmd [itcl::code $this comboBoxCallback]
+	}
+
+	# bind to the test number, so the footer is automagically updated as the test number
+	# is edited
+	bind	$itk_component(testNumComboBox).e	\
+			<KeyRelease> [itcl::code $this comboBoxCallback]
+
+	itk_component add vendorLabel {
+		label $itk_component(numVendSNFrame).vendorLabel -text {Vendor}
+	}
+	itk_component add vendorEntry {
+		iwidgets::entryfield $itk_component(numVendSNFrame).vendorEntry	\
+			-textvariable [itcl::scope vendor]
+	}
+	itk_component add snLabel {
+		label $itk_component(numVendSNFrame).snLabel -text {Serial Number}
+	}
+	itk_component add snEntry {
+		iwidgets::entryfield $itk_component(numVendSNFrame).snEntry	\
+			-textvariable [itcl::scope serialNumber]
+	}
+	# kludge to get background and foreground the same as iwidget entries
+	$itk_component(testNumComboBox) configure	\
+		-entrybg [$itk_component(vendorEntry) cget -textbackground]	\
+		-foreground [$itk_component(vendorEntry) cget -foreground]
+
+	# and grid them
+	set gridCols -1
+	grid $itk_component(testNumLabel)	\
+		-column [incr gridCols] -row 0 -sticky nes
+	grid $itk_component(testNumComboBox)	\
+		-column [incr gridCols] -row 0 -sticky news
+	grid $itk_component(vendorLabel)	\
+		-column [incr gridCols] -row 0 -sticky nes
+	grid $itk_component(vendorEntry)	\
+		-column [incr gridCols] -row 0 -sticky ew
+	grid $itk_component(snLabel)	\
+		-column [incr gridCols] -row 0 -sticky nes
+	grid $itk_component(snEntry)	\
+		-column [incr gridCols] -row 0 -sticky ew
+
+	grid rowconfigure		$itk_component(numVendSNFrame) 0 -weight 0
+	grid columnconfigure	$itk_component(numVendSNFrame) 0 -weight 0
+	grid columnconfigure	$itk_component(numVendSNFrame) 1 -weight 1
+	grid columnconfigure	$itk_component(numVendSNFrame) 2 -weight 0
+	grid columnconfigure	$itk_component(numVendSNFrame) 3 -weight 1
+	grid columnconfigure	$itk_component(numVendSNFrame) 4 -weight 0
+	grid columnconfigure	$itk_component(numVendSNFrame) 5 -weight 1
+
+	# these are the common options for all my scrolledtext widgets
+	set textOptions "-width 0	\
+		-height 0	\
+		-hscrollmode dynamic	\
+		-wrap none	\
+		-vscrollmode dynamic	\
+		-visibleitems 80x5"
+
+	# create four scrolled text widgets with labels
+	itk_component add headerLabel {
+		label $itk_interior.headerLabel -text Header
+	}
+	itk_component add headerText {
+		eval iwidgets::scrolledtext $itk_interior.headerText $textOptions -state disabled
+	}
+	itk_component add footerLabel {
+		label $itk_interior.footerLabel -text Footer
+	}
+	itk_component add footerText {
+		eval iwidgets::scrolledtext $itk_interior.footerText $textOptions -state disabled
+	}
+	itk_component add dispNotesLabel {
+		label $itk_interior.dispNotesLabel -text {Displayed Notes}
+	}
+	itk_component add dispNotesText {
+		eval iwidgets::scrolledtext $itk_interior.dispNotesText $textOptions
+	}
+	itk_component add nonDispNotesLabel {
+		label $itk_interior.nonDispNotesLabel -text {Non-Displayed Notes}
+	}
+	itk_component add nonDispNotesText {
+		eval iwidgets::scrolledtext $itk_interior.nonDispNotesText $textOptions
+	}
+
+	# bind to the displayed notes and non-displayed notes text widget and update the
+	# base classes variables with the current text
+		
+	bind	[$itk_component(dispNotesText) component text]	\
+			<KeyRelease>	\
+			[itcl::code $this notesCallback dispNotesText DisplayedNotes]
+	bind	[$itk_component(nonDispNotesText) component text]	\
+			<KeyRelease>	\
+			[itcl::code $this notesCallback nonDispNotesText NonDisplayedNotes]
+
+	# and grid them
+	set gridRows -1
+	grid $itk_component(measureTxtFilenameFrame)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(numVendSNFrame)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(headerLabel)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(headerText)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(footerLabel)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(footerText)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(dispNotesLabel)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(dispNotesText)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(nonDispNotesLabel)	\
+		-column 0 -row [incr gridRows] -sticky news
+	grid $itk_component(nonDispNotesText)	\
+		-column 0 -row [incr gridRows] -sticky news
+
+	# have the text widgets expand, all others not
+	grid columnconfigure $itk_interior 0 -weight 1
+	grid rowconfigure $itk_interior 0 -weight 0
+	grid rowconfigure $itk_interior 1 -weight 0
+	grid rowconfigure $itk_interior 2 -weight 0
+	grid rowconfigure $itk_interior 3 -weight 1
+	grid rowconfigure $itk_interior 4 -weight 0
+	grid rowconfigure $itk_interior 5 -weight 1
+	grid rowconfigure $itk_interior 6 -weight 0
+	grid rowconfigure $itk_interior 7 -weight 1
+	grid rowconfigure $itk_interior 8 -weight 0
+	grid rowconfigure $itk_interior 9 -weight 1
+
+	buildMeasListDialog
+
+	eval itk_initialize $args
+
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::browseMeasButtonCallback
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Prompt for file, and parse if dialog not cancelled
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::browseMeasButtonCallback {} {
+	set fn [tk_getOpenFile]
+	if {$fn != ""} {
+		set measFilename $fn
+		parseMeasFilename
+	}
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::parseMeasFilename
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Call base class parser.  Put header text into header widget and
+#  | populate test number combo box
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::parseMeasFilename {} {
+
+	# call the base class parser
+	[itcl::code $this MeasText::parseMeasFilename]
+
+	# and put the header into the header text area
+	$itk_component(headerText) configure -state normal
+	$itk_component(headerText) delete 0.0 end
+	$itk_component(headerText) insert 0.0 [join $header "\n"]
+	$itk_component(headerText) configure -state disabled
+
+	# and the test numbers into the combo box
+	$itk_component(testNumComboBox) configure -values [getTestNumbers]
+
+	# and clear the entry and the current test
+	$itk_component(testNumComboBox).e delete 0 end
+	comboBoxCallback
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::comboBoxCallback
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Responds to changes in the test number combo box.  Puts the test
+#  | text corrersponding to the current test number in the combobox
+#  | entry field into the footer text widget.
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::comboBoxCallback {} {
+	$itk_component(footerText) configure -state normal
+	$itk_component(footerText) delete 0.0 end
+	set selection [$itk_component(testNumComboBox) getvalue]
+	set currentTest [lindex [$itk_component(testNumComboBox) cget -values] $selection]
+	if {$selection >= 0} {
+		$itk_component(footerText)	insert 0.0	\
+			[join [lindex [getCurrentTest] 1] "\n"]
+	}
+	$itk_component(footerText) configure -state disabled
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::notesCallback
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | As user updates text in the text widget (either displayed or
+#  | non-displayed) get the text out of the text widget
+#  | and stick it in the base class variable
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  | textWidget - the text widget the user is typing in
+#  | 
+#  | baseClassNotes - the type of notes the user is typing in
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::notesCallback {textWidget baseClassNotes} {
+	set$baseClassNotes	\
+		[split [string trim [[$itk_component($textWidget) component text] get 0.0 end] "\n"] "\n"]
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::measListDialogOKCallback
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | The measure.txt list has been OK'd.  Get the selection and parse
+#  | that file
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::measListDialogOKCallback {args} {
+
+	set tree $itk_component(measListDialogTree)
+
+	set selection [lindex [array get pathArray [$tree selection get]] 1]
+
+	# if there is one
+	if {$selection != ""} {
+
+		set measFilename $selection
+		parseMeasFilename
+		closeMeasListDialog
+	}
+
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::buildMeasListDialog
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Create the dialog for presenting a list of measure.txt files to
+#  | the user.  Also provides a scan button to examine the design
+#  | tree and update the list.
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::buildMeasListDialog {} {
+	itk_component add measListDialog {
+		iwidgets::dialogshell $itk_interior.measListDialog	\
+			-title "Pick a *measure.txt file"	\
+			-modality application
+	}
+
+	$itk_component(measListDialog) add OK	\
+		-text OK	\
+		-command [itcl::code $this measListDialogOKCallback]
+
+	$itk_component(measListDialog) add SCAN	\
+		-text SCAN	\
+		-command [itcl::code $this scanCallback]
+
+	$itk_component(measListDialog) add CANCEL	\
+		-text CANCEL	\
+		-command [itcl::code $this closeMeasListDialog]
+
+	set cs [$itk_component(measListDialog) childsite]
+	
+	itk_component add measListDialogTree {
+		Tree $cs.tree
+	}
+	itk_component add measListDialogVScrollbar {
+		scrollbar $cs.measListDialogVScrollbar	\
+			-orient vertical	\
+			-command "$itk_component(measListDialogTree) yview"
+	}
+	itk_component add measListDialogHScrollbar {
+		scrollbar $cs.measListDialogHScrollbar	\
+			-orient horizontal	\
+			-command "$itk_component(measListDialogTree) xview"
+	}
+	$itk_component(measListDialogTree) configure	\
+		-xscrollcommand "$itk_component(measListDialogHScrollbar) set"	\
+		-yscrollcommand "$itk_component(measListDialogVScrollbar) set"
+
+
+	grid $itk_component(measListDialogTree) -column 0 -row 0 -sticky news
+	grid $itk_component(measListDialogVScrollbar) -column 1 -row 0 -sticky news
+	grid $itk_component(measListDialogHScrollbar) -column 0 -row 1 -sticky news
+	grid columnconfigure $cs 0 -weight 1
+	grid rowconfigure $cs 0 -weight 1
+
+	$itk_component(measListDialogTree)	\
+		bindText <Double-ButtonPress-1> [itcl::code $this measListDialogOKCallback]
+
+
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::closeMeasListDialog
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Guess
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::closeMeasListDialog {} {
+	$itk_component(measListDialog) deactivate
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::pickMeasListButtonCallback
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | The user clicked the measList button.  Build the list dialog.
+#  | Populate the list in the dialog with the contents of the
+#  | pathsFilename.  Show the dialog
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::pickMeasListButtonCallback {} {
+
+	if {![winfo exists $itk_component(measListDialog)]} {
+		buildMeasListDialog
+	}
+
+	set tree $itk_component(measListDialogTree)
+	$tree selection clear
+	$tree delete [$tree nodes root]
+	::fileutil::foreachLine line $pathsFilename {
+		set splitline [split [string trim $line "/"] "/"]
+		set program [lindex $splitline 2]
+		set project [lindex $splitline 3]
+		set measFile  [lindex $splitline 5]
+		if {$program != "" && $project != ""} {
+			if {[array get programs $program] == ""} {
+				set programs($program) 1
+				$tree insert end root $program -text $program
+			}
+			if {[array get projects [set program][set project]] == ""} {
+				set projects([set program][set project]) 1
+				$tree insert end $program [set program][set project] -text $project
+			}
+			set nodeName [set program][set project][set measFile]
+			$tree insert end [set program][set project] $nodeName -text $measFile
+			set pathArray($nodeName) $line
+		}
+	}
+
+	$itk_component(measListDialog) activate
+
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::scanCallback
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | The scan button has been clicked in the measure.txt list dialog.
+#  | Create a dialog with a bit of text and a progress bar.
+#  | Start scanning the design tree and updating the progress bar
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::scanCallback {} {
+
+	# A dialog with text and a progress bar
+	iwidgets::dialogshell .scanDialog -separator 0
+	set cs [.scanDialog childsite]
+	pack [ProgressBar $cs.pb -variable [itcl::scope result]]
+	pack [label $cs.l -text "Scanning the design tree\nfor measure.txt files"]
+	.scanDialog center
+	.scanDialog activate
+
+	# start scanning the design tree
+	after 1 [itcl::code $this scanDesignTree]
+
+	# and updating the progress bar
+	after 10 [itcl::code $this updateScanningProgress]
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::scanDesignTree
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Init the variables used for scanning and schedule the method
+#  | used to do the scanning
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::scanDesignTree {} {
+	set designTreeIndex 0
+	set designTreeMeasTextList [list]
+	if {![catch {glob //sppdgfs/designs/*} {designTree}]} {
+		after 10 [itcl::code $this scanningDesignTree]
+	}
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::scanningDesignTree
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Go down one level into the design tree and scan for measure.txt
+#  | files, schedule another iteration and then return to the event loop.
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::scanningDesignTree {} {
+	if {$designTreeIndex < [llength $designTree]} {
+		if {![catch {glob [lindex $designTree $designTreeIndex]/*/docs/*measure.txt} {list}]} {
+			foreach file $list {
+				lappend designTreeMeasTextList $file
+			}
+		}
+		incr designTreeIndex
+		after 10 [itcl::code $this scanningDesignTree]
+	}
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasTextGui::updateScanningProgress
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Update the progress bar with how far through scanning the design
+#  | tree we are
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasTextGui::updateScanningProgress {} {
+
+	# Get % of scanning
+	catch {expr {$designTreeIndex / ([llength $designTree] * 1.0) * 100}} {result}
+
+	# if not done schedule another check
+	if {$designTreeIndex < [llength $designTree]} {
+		after 400 [itcl::code $this updateScanningProgress]
+	} else {
+
+		# done scanning, so nuke the progress dialog
+		destroy .scanDialog
+
+		# create a temp file
+		set tmpFilename .measTextGui[clock format [clock seconds] -format "%Y%m%d%H%M%S"]
+
+		# and write the measure.txt filenames there
+		set tmpFile [open $tmpFilename w]
+		foreach line [lsort $designTreeMeasTextList] {
+			puts $tmpFile "\/[set line]"
+		}
+		close $tmpFile
+
+		# move the temp file to the real file
+		file rename -force $tmpFilename $pathsFilename
+
+		# and simulate the user clicking the measList button
+		pickMeasListButtonCallback
+	}
+}
+
+# a procedure with the same name as the mega-widget class,
+# but with all lower-case letters, can be used to create mega-widgets.
+# This adheres to the Tk convention for widget creation commands
+proc meastextgui {pathName args} {
+    uplevel MeasTextGui $pathName $args
+}
+
+itcl::class MeasTextGuiToplevel {
+	inherit MeasTextGui
+	method constructor {args} {
+		set ds [iwidgets::Dialogshell .dialog_[string map {. ""} $itk_interior]_dialogShell]
+		grid $itk_interior -in $ds -row 0 -column 0 -sticky news
+		$ds activate
+	}
+	variable ds
+}
+
+proc exampleUsingMeasTextGui {} {
+	# create a bwidget dialog
+	Dialog .dialog -title "Measure Information" -default 1 -cancel 0 -modal none
+
+	# get the frame and create a MeasTextGui in it
+	MeasTextGui [.dialog getframe].measTextGui
+	pack [.dialog getframe].measTextGui
+
+	# Create a close button and show the dialog
+	.dialog add -text Close -command {.dialog withdraw}
+	.dialog draw
+}
+

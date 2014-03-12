@@ -1,0 +1,92 @@
+
+2000 09 13 12:53:42 sommer NMMTL_2DLF
+
+Node = MRL_TFI_bem:9-7-00
+Number of Signal Lines =   3
+Number of Ground Lines, including top ground plane =   1
+Coupling Length =   0.04000 meters
+Rise Time =   400.0000 picoseconds
+Contour (conductor) segments [cseg] = 200
+Ground Plane/Dielectric segments [dseg] = 400
+Note: minimum frequency for surface current assumptions is 23841 MHz.
+Mutual and Self Electrostatic Induction:
+B(Active Signal , Passive Signal) Farads/Meter
+B( signal1 , signal1 )=   1.1508786e-10
+B( signal1 , signal2 )=  -4.1967520e-13
+B( signal1 , signal3 )=  -2.2046738e-16
+B( signal2 , signal1 )=  -4.1965541e-13
+B( signal2 , signal2 )=   1.1508984e-10
+B( signal2 , signal3 )=  -4.1967683e-13
+B( signal3 , signal1 )=  -2.1666831e-16
+B( signal3 , signal2 )=  -4.1965783e-13
+B( signal3 , signal3 )=   1.1508743e-10
+
+Mutual and Self Inductance:
+L(Active Signal , Passive Signal) Henrys/Meter
+L( signal1 , signal1 )=   3.0894662e-07
+L( signal1 , signal2 )=   1.1265915e-09
+L( signal1 , signal3 )=   4.7000351e-12
+L( signal2 , signal1 )=   1.1265384e-09
+L( signal2 , signal2 )=   3.0894546e-07
+L( signal2 , signal3 )=   1.1265960e-09
+L( signal3 , signal1 )=   4.6894467e-12
+L( signal3 , signal2 )=   1.1265415e-09
+L( signal3 , signal3 )=   3.0894708e-07
+
+Asymmetry Ratios:
+
+  Asymmetry ratio for inductance matrix:
+     0.225282% (max), 0.078277% (average)
+
+**********
+  Asymmetry ratio for electrostatic induction matrix:
+     1.723186% (max), 0.577476% (average).
+  (Note values greater than 1% are a probable indication of too few elements.
+  Try adjusting CSEG and DSEG attributes.)
+**********
+
+Characteristic Impedance (Ohms):
+For Signal Line signal1= 51.8116
+For Signal Line signal2= 51.8111
+For Signal Line signal3= 51.8117
+
+Effective Dielectric Constant:
+For Signal Line signal1= 3.2
+For Signal Line signal2= 3.2
+For Signal Line signal3= 3.19999
+
+Propagation Velocity (meters/second):
+For Signal Line signal1=   1.6758915e+08
+For Signal Line signal2=   1.6758915e+08
+For Signal Line signal3=   1.6758934e+08
+
+Propagation Delay (seconds/meter):
+For Signal Line signal1=   5.9669733e-09
+For Signal Line signal2=   5.9669733e-09
+For Signal Line signal3=   5.9669665e-09
+
+Rdc:
+Rdc(Active Signal , Passive Signal) Ohms/Meter
+Rdc( signal1 , signal1 )=   2.4767671e+02
+Rdc( signal1 , signal2 )=   0.0000000e+00
+Rdc( signal1 , signal3 )=   0.0000000e+00
+Rdc( signal2 , signal1 )=   0.0000000e+00
+Rdc( signal2 , signal2 )=   2.4767580e+02
+Rdc( signal2 , signal3 )=   0.0000000e+00
+Rdc( signal3 , signal1 )=   0.0000000e+00
+Rdc( signal3 , signal2 )=   0.0000000e+00
+Rdc( signal3 , signal3 )=   2.4767616e+02
+
+Far-End (Forward) Cross Talk:
+FXT(Active Signal, Passive Signal)
+FXT( signal1 , signal2 )= -9.51018e-09 =  -160.43623 dB
+FXT( signal1 , signal3 )= -3.96418e-06 =  -108.03694 dB
+FXT( signal2 , signal3 )= -3.47087e-09 =  -169.19124 dB
+
+Near-End (Backward) Cross Talk:
+BXT(Active Signal, Passive Signal)
+BXT( signal1 , signal2 )= 1.82319e-03 =   -54.78337 dB
+BXT( signal1 , signal3 )= 4.26536e-06 =  -107.40088 dB
+BXT( signal2 , signal3 )= 1.82320e-03 =   -54.78333 dB
+
+NOTE: Cross talk results assume there are no reflections.

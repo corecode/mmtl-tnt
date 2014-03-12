@@ -1,0 +1,42 @@
+#----------------------------------
+# File:  coplanar.xsctn
+# $Id: coplanar.xsctn,v 1.3 2004/09/10 21:23:06 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Example Coplanar Waveguide"
+set ::Stackup::couplingLength "0.0254"
+set ::Stackup::riseTime "25"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 10
+set DSEG 10
+
+GroundPlane ground  \
+	 -thickness 1 \
+	 -yOffset 0.0 \
+	 -xOffset 0.0
+DielectricLayer diel1  \
+	 -thickness 9.8 \
+	 -lossTangent 0.0002 \
+	 -permittivity 20 \
+	 -permeability 1.0 \
+	 -yOffset 0.0 \
+	 -xOffset 0.0
+RectangleConductors groundWires  \
+	 -width 4.5 \
+	 -pitch 12 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 0.2 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0
+RectangleConductors cond  \
+	 -width 4.5 \
+	 -pitch 12 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 0.2 \
+	 -number 1 \
+	 -yOffset 0 \
+	 -xOffset 6

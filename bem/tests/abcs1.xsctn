@@ -1,0 +1,27 @@
+#----------------------------------
+# File:  /users/zahn/lib/bem/tests/abcs1.xsctn
+# Fri Sep 27 08:05:45 DST 2002
+#----------------------------------
+
+package require csdl
+
+set _title "Duplicate of abcs1.xsctn"
+set ::Stackup::couplingLength "10000um"
+set ::Stackup::riseTime "400"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 20
+set DSEG 40
+
+GroundPlane G7 
+DielectricLayer D7  \
+	 -thickness 50 \
+	 -lossTangent 0.1 \
+	 -permittivity 10
+RectangleConductors Rect4  \
+	 -width 45 \
+	 -pitch 0 \
+	 -conductivity 4.25e7siemens/meter \
+	 -height 5 \
+	 -yOffset 0 \
+	 -xOffset 0

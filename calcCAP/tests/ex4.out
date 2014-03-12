@@ -1,0 +1,11 @@
+---------------------------------------
+Capacitance Values
+Input file : ex4.in
+---------------------------------------
+142.158     -21.9432     -0.928642     
+-21.943     93.6633     -18.2273     
+-0.928637     -18.2273     87.9803     
+Estimated Maximum Computational Error is: -0
+
+User CPU time: 55
+ Sys CPU time: 0

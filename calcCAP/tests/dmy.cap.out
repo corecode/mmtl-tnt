@@ -1,0 +1,10 @@
+---------------------------------------
+Capacitance Values
+Input file : /sppdg/software/src/tnt/calcCAP/tests/dmy.cap.in
+---------------------------------------
+-50585.5     11700.6     
+11691.5     -50585.5     
+Estimated Maximum Computational Error is: -0
+
+User CPU time: 30
+ Sys CPU time: 0

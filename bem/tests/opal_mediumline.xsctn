@@ -1,0 +1,31 @@
+#----------------------------------
+# File:  /users/zahn/em/tests/opal_mediumline.xsctn
+# Wed Feb 13 14:45:48 CST 2002
+#----------------------------------
+
+package require csdl
+
+set _title ""
+set ::Stackup::couplingLength "1.65400inches"
+set ::Stackup::riseTime "60"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 10
+set DSEG 10
+
+GroundPlane G1 
+DielectricLayer D1  \
+	 -thickness 8 \
+	 -lossTangent 0.003 \
+	 -permittivity 3.8
+RectangleConductors Rect1  \
+	 -width 17 \
+	 -pitch 0 \
+	 -conductivity "5.9596e7siemens/meter" \
+	 -height 0.5 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer Air  \
+	 -thickness 8 \
+	 -lossTangent 0 \
+	 -permittivity 1

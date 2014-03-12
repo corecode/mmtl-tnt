@@ -1,0 +1,32 @@
+#----------------------------------
+# File:  /sppdg/software/src/tnt/calcCAP/tests/dmy.xsctn
+# Thu Oct 10 10:33:28 DST 2002
+#----------------------------------
+
+package require csdl
+
+set _title ""
+set ::Stackup::couplingLength "0.0"
+set ::Stackup::riseTime "0.0"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "meters"
+set CSEG 10
+set DSEG 10
+
+GroundPlane GG2 
+DielectricLayer D2  \
+	 -thickness 20 \
+	 -lossTangent 0.014 \
+	 -permittivity 4.26
+RectangleConductors Rect2  \
+	 -width 7 \
+	 -pitch 12 \
+	 -conductivity 3.0siemens/meter \
+	 -height 3 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer D4  \
+	 -thickness 20 \
+	 -lossTangent 0.014 \
+	 -permittivity 4.26

@@ -1,0 +1,29 @@
+sppdgTcllib/console/INSTALL
+
+	console package installation instructions
+
+
+This tcl library provides the 'console' package for use within 
+applications.
+
+The library includes GNU autotools files for configuring and
+installing the library.  It can either be installed on its own, or it
+can be installed as a subdirectory of sppdgTcllib.  These instructions
+are for individual installation.
+
+Before installing, make sure that the package version numbers match in
+all the right places.  The version number in console.tcl and
+pkgIndex.tcl (on the [package provide] and [package ifneeded] lines)
+control the version number within the Tcl interpreter.  The version
+numbers in configure.ac control the directory numbering for the target
+installation.  All files should also be tagged in CVS with the proper
+version number, where the tag is of the form console_1_3_2 (using
+underscores instead of periods).
+
+To make and install this library, select a prefix for installation,
+usually matching sppdgTcllib's location.
+
+  configure --prefix=/sppdg/software/lib/common/sppdgTcllib0.1
+  make
+  make install
+

@@ -1,0 +1,28 @@
+#----------------------------------
+# File:  test1.xsctn
+# $Id: test1.xsctn,v 1.2 2004/07/20 17:02:41 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Simple Two Conductor Transmission Line Example"
+set ::Stackup::couplingLength "0.02540"
+set ::Stackup::riseTime "25"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 45
+set DSEG 45
+
+GroundPlane G9 
+DielectricLayer D7  \
+	 -thickness 10 \
+	 -lossTangent 0.012 \
+	 -permittivity 4
+RectangleConductors Rect8  \
+	 -width 18 \
+	 -pitch 50 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 1.4 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0

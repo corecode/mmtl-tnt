@@ -1,0 +1,71 @@
+
+     -------------------------------------
+           The Geometrical Parameters
+     -------------------------------------
+
+       Dielectric Number:   2
+
+       Ground     Number:   1
+       Rectangle  Number:   2
+       Circle     Number:   0
+       Trapezoid  Number:   0
+
+     -------------------------------------
+        DIELETRIC1
+
+         lowerleft x:   0
+         lowerleft y:   0.000050
+               width:   0.000700
+              height:   0.000700
+                epsr:   12
+
+        DIELETRIC2
+
+         lowerleft x:   0
+         lowerleft y:   0.000750
+               width:   0.000700
+              height:   0.000050
+                epsr:   1
+
+     -------------------------------------
+        GROUND PLANE1
+
+         lowerleft x:   0
+         lowerleft y:   0
+               width:   0.000700
+              height:   0.000050
+
+     -------------------------------------
+        RECTANGLE1
+
+         lowerleft x:   0.000347
+         lowerleft y:   0.000750
+               width:   0.000002
+              height:   0.00000055
+
+        RECTANGLE2
+
+         lowerleft x:   0.000351
+         lowerleft y:   0.000750
+               width:   0.000002
+              height:   0.00000055
+
+     -------------------------------------
+
+
+     -------------------------------------
+            The Calculation Parameters
+     -------------------------------------
+
+       Wavelet Point Number:   1024
+        Number of Iteration:   40
+           Resolution Level:   6
+         Gauss Quadrature X:   8
+         Gauss Quadrature Y:   10
+      # of Segments/Wavelet:   5
+             OPQ Seperation:   0.0
+              STAB Accuracy:   1.0e-5
+            Matrix Solution:   2
+      Order of Approximation   5
+         Approximation Range   20000.0
+

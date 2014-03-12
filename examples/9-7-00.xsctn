@@ -1,0 +1,34 @@
+#----------------------------------
+# File:  9-7-00.xsctn
+# $Id: 9-7-00.xsctn,v 1.2 2004/07/20 17:02:41 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Example Offset Stripline Transmission Line"
+set ::Stackup::couplingLength "0.04"
+set ::Stackup::riseTime "400"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 20
+set DSEG 40
+
+GroundPlane G1 
+DielectricLayer D1  \
+	 -thickness 32 \
+	 -lossTangent 0.1 \
+	 -permittivity 3.2
+TrapezoidConductors Trap1  \
+	 -pitch 100 \
+	 -conductivity 4.25e7siemens/meter \
+	 -bottomWidth 18 \
+	 -height 5 \
+	 -number 3 \
+	 -topWidth 20 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer D3  \
+	 -thickness 22 \
+	 -lossTangent 0.1 \
+	 -permittivity 3.2
+GroundPlane G3 

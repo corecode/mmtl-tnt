@@ -1,0 +1,21 @@
+--------------------------------------------------------
+Resistance/Inductance Values
+Input file: tst1.data.in
+--------------------------------------------------------
+Frequency: 5e+09     Conductivity: 5.6e+07
+
+2X2 Resistance Matrix (Ohm/m):
+
+5454.18     263.571     
+
+263.571     5455.08     
+
+2X2 Inductance Matrix (H/m):
+
+4.65635e-07     1.09763e-07     
+
+1.09763e-07     4.65614e-07     
+
+
+User CPU time: 13
+ Sys CPU time: 0

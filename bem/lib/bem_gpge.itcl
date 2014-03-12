@@ -1,0 +1,637 @@
+# --------------------------------------------------------------------
+#
+#  gpge.itcl
+#
+#  The classes in this file can generate a GPGE graphic file
+#  from the CSDL description, which can in turn be used
+#  in MMTL simulators.
+#
+#  Bob Techentin
+#  February 2, 2001
+#
+#  Copyright 2001-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: bem_gpge.itcl,v 1.4 2004/02/12 22:28:27 techenti Exp $
+#
+# --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
+#
+# Rules for making a GPGE graphic cross section
+#
+#  0.  Object section starts with $OBJECT, $PAGE, $PAGESIZE, $DESIGN
+#      $ORIGIN, and $PINGRID records, followed by ICON section attributes
+#      "COUPLING_LENGTH", "RISETIME", "FREQUENCY" (if != 0), 
+#      "CONDUCTIVITY" (if != 0), "CONTOUR_SEGMENTS" and "PLANE_SEGMENTS".
+#
+#  1.  Pins and pin attributes for polygon shapes.
+#      Attributes are "POLYGON_VERTEX".
+#      Record looks like:
+#        \t(6.58333,1.14685)2;
+#        \t\t$ATT;
+#        \t\t"POLYGON_VERTEX" (0,0) "( 24 mils, 18 mils )" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+#  2.  Bottom ground plane is INSTANCE (I record) at (0,0).
+#      Attribute is "COMP" for instance component number.
+#      Record looks like:
+#        \tI ground_plane (0,0)(0,0)0,0,0;
+#        \t\t$ATT;
+#        \t\t"COMP" (0,0) "10001" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+#  3.  Top ground plane, if it exists, is the second instance, 
+#      located at (0,$top_of_last_dielectric_layer).
+#      Record looks like:
+#        \tI ground_plane (0,3.29667)(0,3.29667)0,0,0;
+#        \t\t$ATT;
+#        \t\t"COMP" (0,0) "10002" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+#  4.  Dielectric layers are drawn as RECTANGLE primitives.
+#      First dielectric layer starts at y=0.32.  Dielectric
+#      layers are drawn as rectangles from x=1.25 to x=9.25.
+#      Attributes are "LOWER_LEFT", "UPPER_RIGHT", 
+#      "RELATIVE_PERMITTIVITY", and "LOSS_TANGENT" (if != 0).
+#      Record looks like:
+#        \tR(1.25,0.32)(9.25,3.29667)2,0,0;
+#        \t\t$ATT;
+#        \t\t"LOWER_LEFT" (0,0) "( 0 mils , 0 mils )" 2,0.06,1,2,1,1,0,0;
+#        \t\t"UPPER_RIGHT" (0,0) "( 156 mils , 52 mils )" 2,0.06,1,2,1,1,0,0;
+#        \t\t"RELATIVE_PERMITTIVITY" (0,0) "4.2" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+#  5.  Rectangle conductors are drawn as RECTANGLE primitives.
+#      Attributes are "LOWER_LEFT", "UPPER_RIGHT", and
+#      "SIGNAL_NAME".
+#      Record looks like:
+#        \tR(4.01923,0.548974)(4.17308,0.589045)3,47,1;
+#        \t\t$ATT;
+#        \t\t"SIGNAL_NAME" (0,0) "signal1" 2,0.06,1,2,1,1,0,0;
+#        \t\t"LOWER_LEFT" (0,0) "( 54 mils , 4 mils )" 2,0.06,1,2,1,1,0,0;
+#        \t\t"UPPER_RIGHT" (0,0) "( 57 mils , 4.7 mils )" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+#  6.  Circle conductors are drawn as circles, with the "A" primitive.
+#      (for ARC, I think).  Circles are defined by their center and
+#      radius, instead of bounding box.
+#      Atttibutes are "CIRCLE_CENTER", "CIRCLE_RADIUS" and "SIGNAL_NAME"
+#        \tA(4.07353,1.37059)(4.23039,1.37059)3,47,1;
+#        \t\t$ATT;
+#        \t\t"SIGNAL_NAME" (0,0) "signal1" 2,0.06,1,2,1,1,0,0;
+#        \t\t"CIRCLE_CENTER" (0,0) "( 180 mils , 60 mils )" 2,0.06,1,2,1,1,0,0;
+#        \t\t"CIRCLE_RADIUS" (0,0) "10 mils" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+#  7.  Trapezoid conductors are drawn as polygons, with the "G" primitive.
+#      Attribute is "SIGNAL_NAME".  (Coordinates are all in the PINs.
+#      Lord only knows how much work MMTL has to do to figure out the
+#      connection between the PIN and the POLYGON coordinates. :-)
+#      The polygon record looks like:
+#        \tG 4 (6.138,1.146)(6.175,1.312)(6.54,1.312)(6.583,1.146)3,47,1;
+#        \t\t$ATT;
+#        \t\t"SIGNAL_NAME" (0,0) "signal4" 2,0.06,1,2,1,1,0,0;
+#        \t\t$END;
+#
+# --------------------------------------------------------------------
+
+package provide bem 1.0
+
+package require Itcl
+
+
+# --------------------------------------------------------------------
+#
+#  itcl::class gpge
+#
+#  This class is a visitor to the CSDL structures.  It can generate
+#  a GPGE cross section from a Stackup or from a list of inidividual
+#  CSDL structures.
+#
+# --------------------------------------------------------------------
+
+itcl::class gpge {
+    #inherit CSDLvisitor
+    variable xOffset 0.0
+    variable yOffset 0.0
+    variable totalWidth 0.0
+    variable scaleFactor 0.0
+
+    #  Parts of the graphic file
+    public variable polygonPins ""
+    public variable iconAttributes ""
+
+    #  Unlike pins and attributes, we build up a list of
+    #  primitives, then sort them according to location.
+    #  Then objects appear in the graphic file in an order
+    #  that compares with the appearance of the cross section.
+    public variable primList {}
+
+    #  State, which is set in higher level structures,
+    #  and used in lower level structures
+    variable otherAttributes ""
+    variable primProps "3,47,1"
+    variable attrProps "2,0.06,1,2,1,1,0,0"
+    variable structName
+
+    # helper functions for translating coordinates
+    method prim_coord { x y }
+    method attr_coord { x y }
+    method attr_length { x }
+
+    #  Produce and return a graphic file
+    #  (as a string)
+    method graphic { stackup } 
+
+    #  HLCSDL - Stackup Structures
+    method visitStackup { stackup x y }
+    method visitGroundPlane { groundPlane x y }
+    method visitDielectricLayer { dielectricLayer x y }
+    method visitRectangleDielectric { rectangleDielectric x y }
+    method visitRectangleConductors { rectangleConductors x y }
+    method visitTrapezoidConductors { trapezoidConductors x y }
+    method visitCircleConductors { circleConductors x y }
+
+    #  LLCSDO - low level structures
+    method visitDielectric { dielectric x y }
+    method visitConductor { conductor x y }
+    method visitGround { ground x y }
+    method visitRectangle { rectangle x y }
+    method visitTrapezoid { trapezoid x y }
+    method visitCircle { circle x y }
+    method visitLayer { layer x y }
+}
+
+
+# --------------------------------------------------------------------
+# helper functions for translating coordinates
+# --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
+#
+#  gpge::prim_coord
+#
+#  Creates coordinate string for GPGE primitives.
+#  The x and y dimensions are scaled to fit 
+#  on the 11x8.5 inch page.
+#
+#  Note that we use the scale factor (computed in the
+#  stackup visitor or the constructor), and add in a
+#  hardcoded offset of (1.25,0.32) so that all coordinates
+#  are "above" the first ground plane instance.  This
+#  first ground plane instance is required, and is hard
+#  coded at (0,0).
+#
+# --------------------------------------------------------------------
+itcl::body gpge::prim_coord { x y } {
+    format "(%g,%g)" \
+	    [expr {([length $x]+$xOffset)*$scaleFactor}] \
+	    [expr {([length $y]+$yOffset)*$scaleFactor + 0.32}] 
+}
+
+# --------------------------------------------------------------------
+#
+#  gpge::attr_coord
+#
+#  Creates coordinate string for GPGE attributes.
+#  The x and y dimensions are converted into
+#  default units and have the units string appended.
+#  For example:  "( 80 mils , 12.5 mils )"
+#
+# --------------------------------------------------------------------
+itcl::body gpge::attr_coord { x y } {
+    format "( %g %s , %g %s )" \
+	    [length $x] $units::default(Length) \
+	    [length $y] $units::default(Length)
+}
+# --------------------------------------------------------------------
+#
+#  gpge::prim_coord
+#
+#  Creates a length string for GPGE primitives.
+#  The value is converted into default units, then
+#  the units string is appended, so the value becomes
+#  something like "20 mils"
+#
+# --------------------------------------------------------------------
+itcl::body gpge::attr_length { x } {
+    format "%g %s" \
+	    [length $x] $units::default(Length)
+}
+
+
+
+# --------------------------------------------------------------------
+#
+#  graphic
+#
+#  Generate a graphic file and return it as a string.
+#
+# --------------------------------------------------------------------
+
+itcl::body gpge::graphic { stackup } {
+
+    set primList {}
+    set polygonPins ""
+    #  Process the layer stackup to get the major parts
+    #  of the graphic file description
+    ::Stackup::accept $this 0 0
+
+    #  Initialize the graphic file string with information
+    #  from the layer stackup.
+    set structureList $Stackup::structureList
+    set stackup_design [info script]
+    set coupling_length "[length $::Stackup::couplingLength] $units::default(Length)"
+    set rise_time "[time $::Stackup::riseTime] $units::default(Time)"
+    set graphic "\$ICON;\n"
+    append graphic "\$DESIGN \"${stackup_design}\";\n"
+    append graphic "\$ORIGIN (4.16,0);\n"
+    append graphic "\$PINGRID (0,0);\n"
+    append graphic "\t\t\$IATT;\n"
+    append graphic "\t\t\"EM_TYPE\" (0,0) \"tran_line\" 2,0.06,1,2,1,1,0,0;\n"
+    append graphic "\t\t\"PAGE1\" (0,0) \"10001\" 2,0.06,1,2,1,1,0,0;\n"
+    append graphic "\t\t\$END;\n"
+    append graphic "\$PINS;\n"
+    append graphic "\$END;\n"
+    append graphic "\$PRIMITIVES;\n"
+    append graphic "\$END;\n"
+    append graphic "\$CONNECTS;\n"
+    append graphic "\$END;\n"
+    append graphic "\$TEXT;\n"
+    append graphic "\$END;\n"
+    append graphic "\$OBJECT;\n"
+    append graphic "\$PAGE 1;\n"
+    append graphic "\$PAGESIZE (11,8.5);\n"
+
+    append graphic "\$DESIGN \"${stackup_design}_1\";\n"
+    append graphic "\$ORIGIN (0,0);\n"
+    append graphic "\$PINGRID (0,0);\n"
+    append graphic "\t\t\$IATT;\n"
+    append graphic "\t\t\"COUPLING_LENGTH\" (0,0) \"${coupling_length}\" 2,0.06,1,2,1,1,0,0;\n"
+    append graphic "\t\t\"RISETIME\" (0,0) \"${rise_time}\" 2,0.06,1,2,1,1,0,0;\n"
+#    append graphic "\t\t\"FREQUENCY\" (0,0) \"${frequency}\" 2,0.06,1,2,1,1,0,0;\n"
+#    append graphic "\t\t\"CONDUCTIVITY\" (0,0) \"${conductivity}\" 2,0.06,1,2,1,1,0,0;\n"
+    append graphic "\t\t\"CONTOUR_SEGMENTS\" (0,0) \"10\" 2,0.06,1,2,1,1,0,0;\n"
+    append graphic "\t\t\"PLANE_SEGMENTS\" (0,0) \"10\" 2,0.06,1,2,1,1,0,0;\n"
+    append graphic "\t\t\$END;\n"
+    append graphic "\$PINS;\n"
+
+
+    # put trapezoid/polygon pins here
+    append graphic $polygonPins
+
+    append graphic "\$END;\n"
+    append graphic "\$PRIMITIVES;\n"
+
+
+    #  Add bottom ground plane instance
+    set struct [lindex $structureList 0]
+    if {[$struct isa GroundPlane]} {
+	append graphic "\tI ground_plane (0,0)(0,0)0,0,0;\n"
+	append graphic "\t\t\$ATT;\n"
+	append graphic "\t\t\"COMP\" (0,0) \"10001\" 2,0.06,1,2,1,1,0,0;\n"
+	append graphic "\t\t\$END;\n"
+    } else {
+	error "Stackup must begin with a bottom GroundPlane"
+    }
+
+    #  Calculate the thickness of the stackup, and add a
+    #  top ground plane if necessary.
+    set y0 0
+    foreach struct [lrange $structureList 1 end-1] {
+	if {[$struct isa GroundPlane]} {
+	    error "Top GroundPlane must be last in the stackup"
+	} else {
+	    if {[$struct isa DielectricLayer]} {
+		set y0 [expr {$y0 + [$struct height]}]
+	    }
+	}
+    }
+    set struct [lindex $structureList end]
+    if {[$struct isa GroundPlane]} {
+
+	scan [prim_coord 0 $y0] "(%f,%f)" xval yval
+	append graphic "\tI ground_plane (0,$yval)(0,$yval)0,0,0;\n"
+	append graphic "\t\t\$ATT;\n"
+	append graphic "\t\t\"COMP\" (0,0) \"10002\" 2,0.06,1,2,1,1,0,0;\n"
+	append graphic "\t\t\$END;\n"
+    } 
+
+    #  Sort primitives, bottom to top, left to right.
+    #  (increasing X and Y coordinates)
+    set primList [lsort -command comparePrimXY $primList]
+
+
+    #  Add primitives to the graphics file string
+    foreach prim $primList {
+	append graphic $prim
+    }
+
+    append graphic "\$END;\n"
+    append graphic "\$CONNECTS;\n"
+    append graphic "\$END;\n"
+    append graphic "\$TEXT;\n"
+    append graphic "\$END;\n"
+
+    # return the string value
+    return $graphic
+}
+
+# --------------------------------------------------------------------
+# 
+#  comparePrimXY
+#
+#  This procedure compares two primitive strings for sorting.
+#  Each primitive is examined for its first (X,Y) coordinate
+#  and the Y values, then the X values are compared.  The
+#  net effect is to sort the primitives from bottom to top, and
+#  (at the same Y offset) from left to right.
+#
+# --------------------------------------------------------------------
+proc comparePrimXY { prim1 prim2 } {
+
+    #  Scan the primitive strings for their X and Y coords
+    #  (skip over non-open-parens, then scan for two floats)
+    scan $prim1 {%[^(](%f,%f)} junk x1 y1
+    scan $prim2 {%[^(](%f,%f)} junk x2 y2
+
+    #  If Y coordinates are equal, then compare X coordinates
+    if { $y1 == $y2 } {
+	set compare [expr {$x1 - $x2}]
+    } else {
+	set compare [expr {$y1 - $y2}]
+    }
+
+    #  must return negative, zero, or positive integer,
+    #  so we have to translate the compare value
+    if { $compare < 0 } {return -1}
+    if { $compare > 0 } {return 1}
+    return 0
+}
+
+# --------------------------------------------------------------------
+
+#  HLCSDL - Stackup Structures
+
+# --------------------------------------------------------------------
+#
+#  gpge::visitStackup
+#
+#  Compute scale factors for GPGE drawing based on
+#  total cross section height and width.
+#
+# --------------------------------------------------------------------
+
+itcl::body gpge::visitStackup { stackup x y } {
+
+   set structureList $Stackup::structureList
+
+    #  Drawn cross section must be 3 times the maximum
+    #  conductor widths and/or dielectric thicknesses.
+    #  (For MMTL to work properly.)
+    if { [::Stackup::height] > [::Stackup::width] } {
+        set xOffset [::Stackup::height]
+    } else {
+        set xOffset [::Stackup::width]
+    }
+    set totalWidth [expr {3.0*$xOffset}]
+
+    set condWidth 0.0
+    set totalWidth 0.0
+    set y0 0.0
+    foreach struct $structureList {
+	if {[$struct isa GroundPlane] || [$struct isa DielectricLayer]} {
+	    if { [$struct height] > 0.0 } {
+		set y0 [expr {$y0 + [$struct height]}]
+	    }
+	}
+	if { [$struct width] > $totalWidth } {
+	    set totalWidth [$struct width]
+	}
+	if {! [$struct isa GroundPlane] && ! [$struct isa DielectricLayer]} {
+	    if { [$struct width] > $condWidth } {
+		set condWidth [$struct width]
+	    }
+	}
+    }
+
+    #  Scale factor is based on total width
+    set totalWidth [expr { $totalWidth * 2 }]
+    set scaleFactor [expr {11.0/$totalWidth}]
+    set xOffset [expr { ($totalWidth - $condWidth) * 0.5}]
+
+    set y0 0
+    foreach struct $structureList {
+	if {[$struct isa GroundPlane] || [$struct isa DielectricLayer]} {
+	    set y0 [expr {$y0 + [$struct height]}]
+	}
+	$struct accept $this 0 $y0
+    }
+}
+
+
+itcl::body gpge::visitGroundPlane { groundPlane x y } {}
+itcl::body gpge::visitDielectricLayer { dielectricLayer x y } {}
+itcl::body gpge::visitRectangleDielectric { rectangleDielectric x y } {}
+itcl::body gpge::visitRectangleConductors { rectangleConductors x y } {}
+itcl::body gpge::visitTrapezoidConductors { trapezoidConductors x y } {}
+itcl::body gpge::visitCircleConductors { circleConductors x y } {}
+
+#  LLCSDO - low level structures
+itcl::body gpge::visitDielectric { dielectric x y } {
+    set primProps "2,0,0"
+    set attrProps "2,0.06,1,2,1,1,0,0"
+    set structName $dielectric
+
+    set permittivity [$dielectric cget -permittivity]
+    set lossTangent [$dielectric cget -lossTangent]
+    set otherAttributes ""
+    append otherAttributes $otherAttributes
+    append otherAttributes "\t\t\"RELATIVE_PERMITTIVITY\" (0,0)\
+	    \"${permittivity}\" $attrProps;\n"
+    if { $lossTangent != 0.0 } {
+	append otherAttributes "\t\t\"LOSS_TANGENT\" (0,0)\
+		\"${lossTangent}\" $attrProps;\n"
+    }
+}
+
+itcl::body gpge::visitConductor { conductor x y } {
+    set attrProps "2,0.06,1,2,1,1,0,0"
+
+    set name "$conductor"
+
+    #---------------------------------------------------------------
+    # If the conductor name starts with GR
+    #---------------------------------------------------------------
+    set typ [string range $name 2 3]
+    set typ [string tolower $typ]
+    if { [string compare $typ "gr"] == 0 } {
+	set primProps "4,47,1"
+    } else {
+	set primProps "3,47,1"
+    }
+
+    set conductivity [$conductor cget -conductivity]
+    set otherAttributes ""
+
+    append otherAttributes $otherAttributes
+    append otherAttributes "\t\t\"SIGNAL_NAME\" (0,0) \"${name}\" $attrProps;\n"
+    append otherAttributes "\t\t\"CONDUCTIVITY\" (0,0) \"${conductivity}\" 2,0.06,1,2,1,1,0,0;\n"
+
+}
+
+itcl::body gpge::visitGround { ground x y} {
+    set primProps "3,47,1"
+    set attrProps "2,0.06,1,2,1,1,0,0"
+    set otherAttributes ""
+}
+
+
+
+# --------------------------------------------------------------------
+#
+#  gpge::visitRectangle
+#
+# --------------------------------------------------------------------
+
+itcl::body gpge::visitRectangle { rectangle xp yp } {
+    #   (x0,y1) + ----------- + (x1,y1)
+    #           |             |
+    #   (x0,y0) + ----------- + (x1,y0)
+    
+    set x0 [length $xp]
+    set y0 [length $yp]
+    set x1 [expr {$x0 + [$rectangle width]}]
+    set y1 [expr {$y0 + [$rectangle height]}]
+    
+    #  Creates the GPGE primitive line and attributes for
+    #  LOWER_LEFT and UPPER_RIGHT coordinates.
+    set primstring ""
+    append primstring "\tR[prim_coord $x0 $y0][prim_coord $x1 $y1]$primProps;\n"
+    append primstring "\t\t\$ATT;\n"
+    append primstring "\t\t\"LOWER_LEFT\" (0,0) \"[attr_coord $x0 $y0]\" $attrProps;\n"
+    append primstring "\t\t\"UPPER_RIGHT\" (0,0) \"[attr_coord $x1 $y1]\" $attrProps;\n"
+    append primstring $otherAttributes
+    append primstring "\t\t\$END;\n"
+    lappend primList $primstring
+}
+
+# --------------------------------------------------------------------
+#
+#  gpge::visitTrapezoid
+#
+# --------------------------------------------------------------------
+
+itcl::body gpge::visitTrapezoid { trapezoid xp yp } {
+    #     (x1,y1) + ----------- + (x2,y1)
+    #            /               \ 
+    #   (x0,y0) + --------------- + (x3,y0)
+    set xp [length $xp]
+    set yp [length $yp]
+    set topWidth [length [$trapezoid cget -topWidth]]
+    set bottomWidth [length [$trapezoid cget -bottomWidth]]
+    set width [$trapezoid width]
+    set height [$trapezoid height]
+
+    set x0 [expr {$xp + ($width - $bottomWidth)/2}]
+    set x1 [expr {$xp + ($width - $topWidth)/2}]
+    set x2 [expr {$xp + ($width + $topWidth)/2}]
+    set x3 [expr {$xp + ($width + $bottomWidth)/2}]
+    set y0 $yp
+    set y1 [expr {$yp + $height}]
+    set xcenter [expr {($x0 + $x3)/2}]
+    set ycenter [expr {($y0 + $y1)/2}]
+
+    #  Create the GPGE primitive line and attributes for
+    #  LOWER_LEFT and UPPER_RIGHT coordinates.
+    set primstring ""
+    append primstring "\tG 4[prim_coord $x0 $y0][prim_coord $x1 $y1][prim_coord $x2 $y1][prim_coord $x3 $y0]$primProps;\n"
+    append primstring "\t\t\$ATT;\n"
+    append primstring $otherAttributes
+    append primstring "\t\t\$END;\n"
+    lappend primList $primstring
+
+    #  Create the GPGE pin definitions for this Trapezoid.
+    append polygonPins "\t[prim_coord $x0 $y0]2;\n"
+    append polygonPins "\t\t\$ATT;\n"
+    append polygonPins "\t\t\"POLYGON_VERTEX\" (0,0) \"[attr_coord $x0 $y0]\" $attrProps;\n"
+    append polygonPins "\t\t\$END;\n"    
+    append polygonPins "\t[prim_coord $x1 $y1]2;\n"
+    append polygonPins "\t\t\$ATT;\n"
+    append polygonPins "\t\t\"POLYGON_VERTEX\" (0,0) \"[attr_coord $x1 $y1]\" $attrProps;\n"
+    append polygonPins "\t\t\$END;\n"    
+    append polygonPins "\t[prim_coord $x2 $y1]2;\n"
+    append polygonPins "\t\t\$ATT;\n"
+    append polygonPins "\t\t\"POLYGON_VERTEX\" (0,0) \"[attr_coord $x2 $y1]\" $attrProps;\n"
+    append polygonPins "\t\t\$END;\n"    
+    append polygonPins "\t[prim_coord $x3 $y0]2;\n"
+    append polygonPins "\t\t\$ATT;\n"
+    append polygonPins "\t\t\"POLYGON_VERTEX\" (0,0) \"[attr_coord $x3 $y0]\" $attrProps;\n"
+    append polygonPins "\t\t\$END;\n"    
+
+}
+
+
+# --------------------------------------------------------------------
+#
+#  gpge::visitCircle
+#
+# --------------------------------------------------------------------
+
+itcl::body gpge::visitCircle { circle xp yp } {
+    #   (x0,y1) + --- + (x1,y1)
+    #           |     |          (just imagine a circle in the box)
+    #   (x0,y0) + --- + (x1,y0)
+    set diameter [length [$circle cget -diameter]]
+    set x0 [length $xp]
+    set y0 [length $yp]
+    set x1 [expr {$x0 + $diameter}]
+    set y1 [expr {$y0 + $diameter}]
+    set xcenter [expr {($x0 + $x1)/2}]
+    set ycenter [expr {($y0 + $y1)/2}]
+    set radius [expr {$diameter/2}]
+
+    #  Creates the GPGE primitive line and attributes for
+    #  CIRCLE_CENTER and CIRCLE_RADIUS and $otherAttributes
+    set primstring ""
+    append primstring "\tA[prim_coord $xcenter $ycenter][prim_coord $x1 $ycenter]$primProps;\n"
+    append primstring "\t\t\$ATT;\n"
+    append primstring "\t\t\"CIRCLE_CENTER\" (0,0) \"[attr_coord $xcenter $ycenter]\" $attrProps;\n"
+    append primstring "\t\t\"CIRCLE_RADIUS\" (0,0) \"[attr_length $radius]\" $attrProps;\n"
+    append primstring $otherAttributes
+    append primstring "\t\t\$END;\n"
+    lappend primList $primstring
+}
+
+
+# --------------------------------------------------------------------
+#
+#  gpge::visitLayer
+#
+# --------------------------------------------------------------------
+
+itcl::body gpge::visitLayer { layer x y } {
+
+    #  The layer width is really $totalWidth.  Subtract
+    #  the X offset from X0.  (prim_coord will add it back in
+    #  to get us back to zero)
+    set x0 [expr {[length $x]-$xOffset}]
+    set x1 [expr {$x0 + $totalWidth}]
+    set y1 [length $y]
+    set y0 [expr {$y1 - [length [$layer cget -thickness]]}]
+
+    if { [$layer cget -thickness] == 0 } {
+	return
+    }
+
+    #  Creates the GPGE primitive line and attributes for
+    #  LOWER_LEFT and UPPER_RIGHT coordinates.
+    set primstring ""
+    append primstring "\tR[prim_coord $x0 $y0][prim_coord $x1 $y1]$primProps;\n"
+    append primstring "\t\t\$ATT;\n"
+    append primstring "\t\t\"LOWER_LEFT\" (0,0) \"[attr_coord $x0 $y0]\" $attrProps;\n"
+    append primstring "\t\t\"UPPER_RIGHT\" (0,0) \"[attr_coord $x1 $y1]\" $attrProps;\n"
+    append primstring $otherAttributes
+    append primstring "\t\t\$END;\n"
+    lappend primList $primstring
+}
+

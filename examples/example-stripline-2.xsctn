@@ -1,0 +1,31 @@
+#----------------------------------
+# File:  example-stripline-2.xsctn
+# $Id: example-stripline-2.xsctn,v 1.3 2004/07/29 13:30:48 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Example Two Conductor Stripline"
+set ::Stackup::couplingLength "0.100"
+set ::Stackup::riseTime "200"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 10
+set DSEG 10
+
+GroundPlane ground 
+DielectricLayer fr4  \
+	 -thickness 50 \
+	 -permittivity 4.7
+RectangleConductors c1  \
+	 -width 12 \
+	 -pitch 20 \
+	 -conductivity 5.0e7siemens/meter \
+	 -height 3 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer fr4-top  \
+	 -thickness 50 \
+	 -permittivity 4.7
+GroundPlane topground 

@@ -1,0 +1,42 @@
+
+2002 02 25 18:16:37 harff NMMTL_2DLF
+
+Node = abcs:abcs1
+Number of Signal Lines =   1
+Number of Ground Lines, including top ground plane =   0
+Coupling Length =   0.01000 meters
+Rise Time =   400.0000 picoseconds
+Contour (conductor) segments [cseg] = 200
+Ground Plane/Dielectric segments [dseg] = 400
+Note: minimum frequency for surface current assumptions is 23841 MHz.
+Mutual and Self Electrostatic Induction:
+B(Active Signal , Passive Signal) Farads/Meter
+B( signal1 , signal1 )=   1.6849763e-10
+
+Mutual and Self Inductance:
+L(Active Signal , Passive Signal) Henrys/Meter
+L( signal1 , signal1 )=   4.1248322e-07
+
+Characteristic Impedance (Ohms):
+For Signal Line signal1= 49.4773
+
+Effective Dielectric Constant:
+For Signal Line signal1= 6.25522
+
+Propagation Velocity (meters/second):
+For Signal Line signal1=   1.1986695e+08
+
+Propagation Delay (seconds/meter):
+For Signal Line signal1=   8.3425830e-09
+
+Rdc:
+Rdc(Active Signal , Passive Signal) Ohms/Meter
+Rdc( signal1 , signal1 )=   1.0457516e+02
+
+Far-End (Forward) Cross Talk:
+FXT(Active Signal, Passive Signal)
+
+Near-End (Backward) Cross Talk:
+BXT(Active Signal, Passive Signal)
+
+NOTE: Cross talk results assume there are no reflections.

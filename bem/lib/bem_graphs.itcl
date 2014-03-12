@@ -1,0 +1,159 @@
+#----------------------------------------------*-TCL-*------------
+#
+#  mmtl_graphs.itcl
+#
+#  Copyright 2002-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: bem_graphs.itcl,v 1.3 2004/02/12 22:28:28 techenti Exp $
+#
+#-----------------------------------------------------------------
+
+
+package provide bem 1.0
+
+package require Itcl
+
+
+
+itcl::class Header {
+    public variable title ""
+    public variable name ""
+    public variable type ""
+    public variable number 0
+}
+
+
+
+itcl::class Graphs {
+    inherit Header
+    
+    public variable widthList ""
+    public variable conductivityList ""
+    public variable pitchList ""
+    public variable heightList ""
+    public variable xList ""
+    public variable dielCList ""
+    public variable rdcList ""
+    public variable xOffList ""
+    public variable yOffList ""
+
+    public variable impList ""
+    public variable impOddList ""
+    public variable impEvenList ""
+    public variable velocityList ""
+    public variable delayList ""
+
+    public variable fxtList ""
+    public variable bxtList ""
+    public variable xList_xt ""
+
+    constructor { args } {
+	eval configure $args
+    }
+
+    method addHeight { hght }
+    method addNumber { num }
+    method addImpedance { imp }
+    method addOddImpedance { imp }
+    method addEvenImpedance { imp }
+    method addVelocity { vel }
+    method addDelay { dly }
+    method addDielectricConstant { dielC }
+    method addWidth { wdth }
+    method addConductivity { conductivity }
+    method addPitch { pitch }
+    method addX { xp }
+    method addRdc { rdc }
+    method addFXT { fxt }
+    method addBXT { bxt }
+    method addXxt { xp }
+    method addXoff { xp }
+    method addYoff { yp }
+
+
+}
+
+itcl::body Graphs::addWidth { value } {
+    lappend widthList $value
+}
+
+itcl::body Graphs::addHeight { value } {
+    lappend heightList $value
+}
+
+itcl::body Graphs::addConductivity { value } {
+    lappend conductivityList $value
+}
+
+itcl::body Graphs::addPitch { value } {
+    lappend pitchList $value
+}
+
+itcl::body Graphs::addImpedance { value } {
+    lappend impList $value
+}
+
+itcl::body Graphs::addOddImpedance { value } {
+    lappend impOddList $value
+}
+
+itcl::body Graphs::addEvenImpedance { value } {
+    lappend impEvenList $value
+}
+
+itcl::body Graphs::addVelocity { value } {
+    lappend velocityList $value
+}
+
+itcl::body Graphs::addDelay { value } {
+    lappend delayList $value
+}
+
+itcl::body Graphs::addDielectricConstant { value } {
+    lappend dielCList $value
+}
+
+itcl::body Graphs::addRdc { value } {
+    lappend rdcList $value
+}
+
+itcl::body Graphs::addXoff { value } {
+    lappend xOffList $value
+}
+
+itcl::body Graphs::addYoff { value } {
+    lappend yOffList $value
+}
+
+itcl::body Graphs::addFXT { value } {
+    lappend fxtList $value
+}
+
+itcl::body Graphs::addBXT { value } {
+    lappend bxtList $value
+}
+
+itcl::body Graphs::addXxt { value } {
+    lappend xList_xt $value
+}
+
+itcl::body Graphs::addX { value } {
+    lappend xList $value
+}
+
+itcl::body Graphs::addXoff { value } {
+    lappend xOffList $value
+}
+
+itcl::body Graphs::addYoff { value } {
+    lappend yOffList $value
+}
+
+itcl::body Graphs::addNumber { num } {
+    set number $num
+}
+
+
+
+
+
+

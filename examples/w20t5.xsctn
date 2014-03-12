@@ -1,0 +1,37 @@
+#----------------------------------
+# File:  w20t5.xsctn
+# $Id: w20t5.xsctn,v 1.2 2004/07/20 17:02:41 techenti Exp $
+#----------------------------------
+
+package require csdl
+
+set _title "Buried Trapezoid Microstrip Example"
+set ::Stackup::couplingLength "0.0"
+set ::Stackup::riseTime "3.0e9"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 10
+set DSEG 10
+
+GroundPlane G1 
+DielectricLayer D1  \
+	 -thickness 16 \
+	 -lossTangent 0.10 \
+	 -permittivity 3.2
+DielectricLayer D3  \
+	 -thickness 16 \
+	 -lossTangent 0.10 \
+	 -permittivity 3.2
+TrapezoidConductors Trap1  \
+	 -pitch 100 \
+	 -conductivity "4.25e7siemens/meter" \
+	 -bottomWidth 18 \
+	 -height 5 \
+	 -number 5 \
+	 -topWidth 20 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer D5  \
+	 -thickness 22 \
+	 -lossTangent 0.10 \
+	 -permittivity 3.2

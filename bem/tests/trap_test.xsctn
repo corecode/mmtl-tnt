@@ -1,0 +1,34 @@
+#----------------------------------
+# File:  /users/zahn/lib/bem/tests/trap_test.xsctn
+# Fri Sep 27 07:49:57 DST 2002
+#----------------------------------
+
+package require csdl
+
+set _title "Duplicate of trap_test.xsctn"
+set ::Stackup::couplingLength "0.02540 meters"
+set ::Stackup::riseTime "25"
+set ::Stackup::frequency "1e9"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 45
+set DSEG 45
+
+GroundPlane G5 
+DielectricLayer D3  \
+	 -thickness 7.6 \
+	 -lossTangent 0.012 \
+	 -permittivity 4
+TrapezoidConductors Trap6  \
+	 -pitch 20 \
+	 -conductivity 3.0e+07siemens/meter \
+	 -bottomWidth 5.3 \
+	 -height 1 \
+	 -number 2 \
+	 -topWidth 4.3 \
+	 -yOffset 0 \
+	 -xOffset 0
+DielectricLayer D5  \
+	 -thickness 10.3 \
+	 -lossTangent 0.012 \
+	 -permittivity 4
+GroundPlane G7 

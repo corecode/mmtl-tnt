@@ -1,0 +1,44 @@
+#! /bin/sh
+#
+###########################################################################
+##
+##  Module Name           fee2dPlotEigenParameters
+##
+##  Description       
+##     This script plots the propation parameters from solving the eigen value
+##     problem calculated by the two dimensional finite element program
+##
+##     
+##
+##
+##  Copyright 2002-2004 Mayo Foundation.  All Rights Reserved.
+##  $Id: xmgrPlotParamaters,v 1.2 2004/02/12 22:20:18 techenti Exp $
+##
+###########################################################################
+
+xmgr \
+-graph 0 \
+-log x \
+$1.resistance \
+-pexec "title size 0.75" \
+-pexec "subtitle size 0.65" \
+-pexec "xaxis  label char size 0.60" \
+-pexec "xaxis  ticklabel char size 0.65" \
+-pexec "yaxis  label char size 0.60" \
+-pexec "yaxis  ticklabel char size 0.65" \
+-graph 2 \
+-log x \
+$1.inductance \
+-pexec "title size 0.75" \
+-pexec "subtitle size 0.65" \
+-pexec "xaxis  label char size 0.60" \
+-pexec "xaxis  ticklabel char size 0.65" \
+-pexec "yaxis  label char size 0.60" \
+-pexec "yaxis  ticklabel op right" \
+-pexec "yaxis  ticklabel char size 0.65" \
+-graph 0 -view 0.08 0.07 0.48 0.47 \
+-graph 2 -view 0.08 0.54 0.48 0.94
+
+
+
+

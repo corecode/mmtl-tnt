@@ -1,0 +1,665 @@
+# --------------------------------------------------------------------
+#
+#  mmtl_welement.itcl
+#
+#  The class in this file can generate an HSPICE W-element
+#  from the CSDL description, and MMTL results.
+#
+#  General usage is to create a Welement object, and call
+#  the welementString method.  The method requires two
+#  sources of data:  first the file name containing the
+#  MMTL results; and second the name of the Stackup object
+#  which will be visited to get additional information.
+#
+#  The MMTL results file provides electrostatic inductance
+#  (B) and inductance (L) matrices.
+#
+#  The Stackup object provides conductor areas and
+#  conductivities which are used to compute DC and AC
+#  resistance.
+#
+#
+#  Bob Techentin
+#  June 11, 2002
+#
+#  Copyright 2002-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: bem_welement.itcl,v 1.6 2004/09/10 19:23:02 techenti Exp $
+#
+# --------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------
+#
+#  Like several other components of the MMTL simulation suite,
+#  the Welement class acts as a visitor to the CSDL cross section
+#  description.
+#
+#  Much of the functionality is based on the Tcl script named
+#  mmtl2hspicew or sim2hspicew, circa 1998.
+#
+# --------------------------------------------------------------------
+
+
+package provide bem 1.0
+
+# --------------------------------------------------------------------
+#
+#  itcl::class Welement
+#
+#  This class is a visitor to the CSDL structures.  It can generate
+#  an HSPICE W-element from an MMTL results file and a layer Stackup.
+#
+# --------------------------------------------------------------------
+
+itcl::class Welement {
+    #inherit CSDLvisitor
+    public variable welement
+    public variable headerText
+    public variable signalName
+    public variable signalNames
+    public variable conductorArea
+    public variable conductorCircumference
+    public variable conductorConductivity
+    public variable N
+    public variable L0
+    public variable C0
+    public variable R0
+    public variable G0
+    public variable Rs
+    public variable Gd
+
+    method dump {} {
+	puts "welement: $welement"
+	puts "headertext: $headerText"
+	puts "signalnames:  $signalNames"
+	catch {parray conductorArea}
+	catch {parray conductorCircumference}
+	catch {parray conductorConductivity}
+	puts "N:  $N"
+	catch {parray L0}
+	catch {parray C0}
+	catch {parray R0}
+	catch {parray G0}
+	catch {parray Rs}
+	catch {parray Gd}
+    }
+
+    #  Produce and return a W element description
+    #  (as a string)
+    method welementString { mmtlResultsFile }
+
+    #  Helper methods
+    private method addLine { string }
+    private method addMatrix { string }
+    private method warningMessage { msgText }
+    private method initialize { }
+    private method readMMTLfile { filename }
+    private method computeLosses { }
+
+    #  HLCSDL - Stackup Structures
+    method visitStackup { stackup x y }
+    method visitGroundPlane { groundPlane x y }
+    method visitDielectricLayer { dielectricLayer x y }
+    method visitRectangleDielectric { rectangleDielectric x y }
+    method visitRectangleConductors { rectangleConductors x y }
+    method visitTrapezoidConductors { trapezoidConductors x y }
+    method visitCircleConductors { circleConductors x y }
+
+    #  LLCSDO - low level structures
+    method visitDielectric { dielectric x y }
+    method visitConductor { conductor x y }
+    method visitGround { ground x y }
+    method visitRectangle { rectangle x y }
+    method visitTrapezoid { trapezoid x y }
+    method visitCircle { circle x y }
+    method visitLayer { layer x y }
+
+}
+
+
+#-------------------------------------------------------------
+#
+#  Helper Methods
+#
+#-------------------------------------------------------------
+
+#-------------------------------------------------------------
+#
+#  NAME              welementString
+#
+#  DESCRIPTION
+#
+#   Returns a string representing the W-element description
+#  of the layer stackup described by the specified layer
+#  stackup and MMTL results file.
+#
+#-------------------------------------------------------------
+itcl::body Welement::welementString {mmtlResultsFile} {
+
+    initialize
+
+    #-------------------------------------------------------------
+    # read the MMTL results
+    #-------------------------------------------------------------
+    readMMTLfile $mmtlResultsFile
+
+    #-------------------------------------------------------------
+    #  Add AC and DC resistance from the layer stackup
+    #-------------------------------------------------------------
+    computeLosses
+
+    #-------------------------------------------------------------
+    #  Build the W-element string
+    #-------------------------------------------------------------
+
+    addLine "*--------------------------------------------"
+    addLine "*"
+    addLine "* RLCG parameters for W-Element"
+    addLine "* frequency-dependent transmission line"
+    addLine "*"
+    addLine "*"
+    addLine "*  MMTL File Name:  $mmtlResultsFile"
+    addLine "*  [clock format [clock seconds]]"
+    addLine "*"
+    addLine "*--------------------------------------------"
+    addLine "*"
+    foreach textLine $headerText {
+	addLine "* | $textLine"
+    }
+    addLine "* |"
+    addLine "* |  Signal Names (in order):"
+    foreach name  $signalNames  {
+	addLine "* |     $name"
+    }
+
+    addLine "*"
+    addLine "*--------------------------------------------"
+    addLine "*"
+    addLine "*  N = number of signal conductors"
+    addLine "*"
+    addLine "*--------------------------------------------"
+    addLine "$N"
+
+    foreach matrixName {L0 C0 R0 G0 Rs Gd} {
+	addLine ""
+	addLine "*--------------------------------------------"
+	addLine "*"
+	addLine "* $matrixName"
+	addLine "*"
+	addLine "*--------------------------------------------"
+	addMatrix $matrixName
+    }
+
+    addLine ""
+
+}
+
+
+#-------------------------------------------------------------
+#
+#  NAME              addLine
+#
+#  DESCRIPTION
+#
+#   Adds a line to the W-element string, including a
+#  newline.  Just a helper function.
+#
+#-------------------------------------------------------------
+itcl::body Welement::addLine { string } {
+    append welement "$string\n"
+}
+
+
+#-------------------------------------------------------------
+#
+#  NAME              addMatrix
+#
+#  DESCRIPTION
+#
+#   This proc formats the 2D matrix (really an array) by
+#   indexing through i and j and appending to the
+#   w-element text.
+#
+#-------------------------------------------------------------
+itcl::body Welement::addMatrix { matrixName } {
+    upvar $matrixName m
+    for {set i 0} {$i<$N} {incr i} {
+	for {set j 0} {$j<=$i} {incr j} {
+	    append welement [format "%g\t" $m($i,$j)]
+	}
+	append welement "\n"
+    }
+}
+
+
+#-------------------------------------------------------------
+#
+#  NAME              warningMessage
+#
+#  DESCRIPTION
+#
+#   This method formats and appends a warning message to
+#   the "headerText", which is included in the W-element
+#   RLCG output file.
+#
+#-------------------------------------------------------------
+itcl::body Welement::warningMessage { msgText  } {
+    set fullText "Warning:  $msgText"
+    lappend headerText $fullText
+}
+
+
+#-------------------------------------------------------------
+#
+#  NAME              Welement::initialize
+#
+#  DESCRIPTION
+#
+#   This method initializes the object's global data,
+#   removing any previous data.
+#
+#-------------------------------------------------------------
+itcl::body Welement::initialize { } {
+
+    #-------------------------------------------------------------
+    #  Initialize all variables
+    #-------------------------------------------------------------
+    set welement ""
+    set headerText {}
+    set signalNames {}
+    array unset conductorArea *
+    array unset conductorCircumference *
+    array unset conductorConductivity *
+    set N  ""
+    foreach name [array names L0] {
+	unset L0($name)
+    }
+    foreach name [array names C0] {
+	unset C0($name)
+    }
+    foreach name [array names R0] {
+	unset R0($name)
+    }
+    foreach name [array names G0] {
+	unset G0($name)
+    }
+    foreach name [array names Rs] {
+	unset Rs($name)
+    }
+    foreach name [array names Gd] {
+	unset Gd($name)
+    }
+}
+
+
+#-------------------------------------------------------------
+#
+#  NAME              readMMTLfile
+#
+#  DESCRIPTION
+#
+#   This method reads the specified MMTL results file and
+#   sets C0, L0, and R0 arrays.  It copies leading text from
+#   the SIM results into the  headerText variable and defines
+#   the number of conductors, N.  This proc also sets default
+#   values for all matrics, including G0, Rs, and Gd.
+#
+#-------------------------------------------------------------
+itcl::body Welement::readMMTLfile { filename } {
+
+
+    #-------------------------------------------------------------
+    #  Set up header text
+    #-------------------------------------------------------------
+    lappend headerText "  MMTL Simulation data from"
+    lappend headerText "  $filename"
+    set readingHeader 1
+
+    #-------------------------------------------------------------
+    #  Locate and open the MMTL results file
+    #-------------------------------------------------------------
+    if {! [file isfile $filename]} {
+	error "Error:  MMTL results file '$filename' does not exist"
+    }
+    if { [catch {open $filename "r"} inFile ] } {
+	error "Error:  cannot open MMTL results file '$filename'"
+    }
+
+
+    #-------------------------------------------------------------
+    #  Process the File Header
+    #
+    #  Read and ignore everything up to the first "Mutual" line,
+    #  except that we capture number of signal lines.
+    #-------------------------------------------------------------
+    gets $inFile textLine
+    while { ! [string match "Mutual*" $textLine] } {
+	if { [eof $inFile] } {
+	    error "Error:  Invalid MMTL results File '$filename'"
+	}
+	lappend headerText "$textLine"
+	if {[regexp "Number of Signal Lines" $textLine]} {
+	    regsub ".*=" $textLine "" N
+	}
+	gets $inFile textLine
+    }
+
+    #-------------------------------------------------------------
+    #  Process remainder of MMTL file, searching for keywords
+    #  at the beginning of each matrix section.  Each section
+    #  is led by a line like:
+    #   B(Active Signal, Passive Signal)
+    #  followed by NxN matrix entries.
+    #
+    #  Note that the signal names are in order for generated
+    #  cross sections, but they could also be arbitrarily named,
+    #  so we save the signal names in the headerText.  We also
+    #  store the order of the signal names so that we can later
+    #  reconstruct each signal's position in the matrix.
+    #
+    #  Note that we could calculate capacitance matrix from the
+    #  electrostatic induction matrix, B, but the HSPICE W element
+    #  is really expecting the B matrix for C0.  Self Capacitance
+    #  (diagonal elements) of the capacitance matrix would be
+    #  the sum of the row (e.g., C11=B11+B12), while mutual
+    #  capacitance (off-diagonal elements) would be the negative
+    #  of the corresponding induction value (e.g., C12=-B12).
+    #-------------------------------------------------------------
+    while {! [eof $inFile]} {
+
+	regexp {[^[:space:]]*} $textLine token
+	switch $token {
+
+	    "B(Active" {
+		#  Copy "B" matrix into C0
+		for {set i 0} {$i<$N} {incr i} {
+		    for {set j 0} {$j<$N} {incr j} {
+			gets $inFile textLine
+			regsub ".*=" $textLine "" C0($i,$j)
+		    }
+
+		    #  Capture the signal name, too.
+		    scan $textLine "B(%s" sigName
+		    lappend signalNames $sigName
+		}
+	    }
+
+	    "L(Active" {
+		#  Copy "L" matrix into L0
+		for {set i 0} {$i<$N} {incr i} {
+		    for {set j 0} {$j<$N} {incr j} {
+			gets $inFile textLine
+			regsub ".*=" $textLine "" L0($i,$j)
+		    }
+		}
+	    }
+
+	    "Rdc(Active" {
+		#  Copy "Rdc" matrix into R0
+		for {set i 0} {$i<$N} {incr i} {
+		    for {set j 0} {$j<$N} {incr j} {
+			gets $inFile textLine
+			regsub ".*=" $textLine "" R0($i,$j)
+		    }
+		}
+	    }
+	}
+
+	#  Read next line of file
+	gets $inFile textLine
+    } ;# end of while {! eof $inFile}
+
+    #-------------------------------------------------------------
+    #  Done with the MMTL results file
+    #-------------------------------------------------------------
+    close $inFile
+
+
+    #-------------------------------------------------------------
+    #  Set all missing matrix elements to default (0.0)
+    #-------------------------------------------------------------
+    for {set i 0} {$i<$N} {incr i} {
+	for {set j 0} {$j<$N} {incr j} {
+	    if { ! [info exists L0($i,$j)] } { set L0($i,$j) 0.0 }
+	    if { ! [info exists R0($i,$j)] } { set R0($i,$j) 0.0 }
+	    if { ! [info exists G0($i,$j)] } { set G0($i,$j) 0.0 }
+	    if { ! [info exists Rs($i,$j)] } { set Rs($i,$j) 0.0 }
+	    if { ! [info exists Gd($i,$j)] } { set Gd($i,$j) 0.0 }
+	}
+    }
+}
+
+
+
+#-------------------------------------------------------------
+#
+#  NAME              Welement::computeLosses
+#
+#  DESCRIPTION
+#
+#   This method computes the loss factors for the MMTL
+#   simulation results (which are loss free) by visiting
+#   the specified layer stackup, and computing both DC and
+#   AC losses from the conductor circumference, area
+#   and conductivity.
+#
+#   The loss values are stored in R0 and Rs.
+#
+#-------------------------------------------------------------
+itcl::body Welement::computeLosses { } {
+
+    set PI 3.141592654
+    set MU_0 1.25663706E-6
+
+    #--------------------------------------------------------------
+    #  Visit the layer stackup to capture conductor
+    #  areas and conductivities
+    #--------------------------------------------------------------
+    ::Stackup::accept $this 0 0
+
+    #--------------------------------------------------------------
+    #  Capture length units from stackup for conversion to SI
+    #--------------------------------------------------------------
+    set units $::Stackup::defaultLengthUnits
+
+    #--------------------------------------------------------------
+    #  Iterate over all conductors.
+    #  Note that we're just computing the diagonal elements
+    #  of the R0 and Rs matrices, so we only have one loop.
+    #--------------------------------------------------------------
+    for {set i 0} {$i<$N} {incr i} {
+
+	#--------------------------------------------------------------
+	#  Convert the MMTL signal name to the csdl signal name.
+	#  MMTL Signal names are of the form <name><type><num> where
+	#  <name> corresponds to the HLCSDL object name,
+	#  <type> is "R", "T", or "C" for the type of conductor, and
+	#  <num> is an increasing integer, just like $i here.
+	#--------------------------------------------------------------
+	set name [lindex $signalNames $i]
+	puts -nonewline "changing conductor $i named $name"
+	regsub {[RTC]\d+$} $name "" name
+	puts " to $name"
+
+	#--------------------------------------------------------------
+	#  Get usefull quantities
+	#--------------------------------------------------------------
+	set area $conductorArea($name)
+	set circ $conductorCircumference($name)
+	set cond $conductorConductivity($name)
+
+	#--------------------------------------------------------------
+	#  Convert to SI units.
+	#  We know that area and circ are in default units and must
+	#  be converted.  But we convert cond only if necessary.
+	#--------------------------------------------------------------
+	set area [units::convert "$area$units^2" "meters^2"]
+	set circ [units::convert "$circ$units"   "meters"]
+	if { ! [string is double $cond] } {
+	    set cond [units::convert $cond "siemens/meter"]
+	}
+
+	#--------------------------------------------------------------
+	#  Compute values according to formulas
+	#
+	#    Rdc = 1/(area*conductivity) ohms/meter
+	#    Rac = sqrt(PI*MU_0/conductivity)/(circumference) siemens/meter^2
+	#--------------------------------------------------------------
+	set rdc [expr {1.0/($area*$cond)}]
+	set rac [expr {sqrt(($PI*$MU_0)/$cond)/($circ)}]
+
+	#--------------------------------------------------------------
+	#  Check for disparity between newly computed Rdc value
+	#  and any value that might have come from MMTL (lossy version)
+	#  Generate a warning if there is a > 10% difference.
+	#--------------------------------------------------------------
+	if { [info exists R0($i,$i)] } {
+	    set ratio [expr {abs($R0($i,$i)/$rdc)}]
+	    if { ($ratio<0.9) || ($ratio>1.1) } {
+		warningMessage "Using Formula for Rdc($i,$i)=$rdc, replacing MMTL value of $R0($i,$i)"
+	    }
+	}
+
+	#--------------------------------------------------------------
+	#  Assign values
+	#--------------------------------------------------------------
+	set R0($i,$i) $rdc
+	set Rs($i,$i) $rac
+    }
+
+    #--------------------------------------------------------------
+    #  Set off-diagonals to zero
+    #--------------------------------------------------------------
+    for {set i 0} {$i<$N} {incr i} {
+	for {set j 0} {$j<$N} {incr j} {
+	    if { $i != $j } {
+		set R0($i,$j) 0.0
+		set Rs($i,$j) 0.0
+	    }
+	}
+    }
+
+}
+
+#-------------------------------------------------------------
+#
+#  NAME              do_help
+#
+#  DESCRIPTION
+#
+#   Returns help text about the sim2hspicew utility.
+#   This can be "put" on stdout, or displayed in a gui
+#   window.
+#
+#-------------------------------------------------------------
+proc do_help { } {
+    return {
+	SIM 2 HSPICE W-Element Converter
+
+This script constructs an HSPICE W-Elelement model rlcg description
+based on the B, L, and Rdc matrices in SIM results files.  It can
+read files of types:
+
+        result                   BEM SIM (result) results
+        electro_results_2dly     2DLY SIM results
+        electro_results_2dlf     2DLF SIM results
+
+The capacitance matrix C0 is copied from SIM's Electrostatic
+Induction matrix B.  (B is NOT converted into a capacitance matrix by
+summing the rows for the diagonal elements and changing the sign on
+the off-diagonal elements.)  The inductance matrix L0 is copied
+directly from SIM's Inductance matrix, L.  If the SIM results file
+contains Rdc (BEM SIM only), then these values are used for R0.
+
+If one of the cross section generating programs was used to generate
+the SIM data file (i.e. there is also an nsim_log file in the same
+directory), the script will read the geometry information and apply
+formulas for calculating R0 and Rs.  If the formula value and the SIM
+value for R0 differ by more than 10%, a warning message is issued, but
+the formula values are always used.
+
+The formulas are:
+
+    R0 = Rdc = 1 / (width * height) ohms/meter
+
+    Rs = Rac = sqrt(PI * MU_0 / c) / (width + height) henrys/meter
+
+Where PI=3.141592654, MU_0=1.25663706E-6 henrys/meter (permeability of
+free-space), and c is the metal conductivity, which defaults to 5.92e7
+siemens/meter (copper).
+
+The W-element RLCG data is written (by default) the file hspice-w.rlcg
+in the same directory as the sim results.  The rlcg file contains a
+header describing its origins and any warning messages that might have
+been generated during its construction.
+
+Command Line Swtiches
+
+  -help         - prints this message
+
+  -c            - generate output (rlcg file) on stdout
+
+  -o filename   - write the rlcg file to the specified file
+
+
+}
+	#  end of help text
+}
+
+
+
+
+
+#  HLCSDL - Stackup Structures
+
+itcl::body Welement::visitStackup { stackup x y } {
+    foreach struct $Stackup::structureList {
+	$struct accept $this 0 0
+    }
+}
+
+itcl::body Welement::visitGroundPlane { groundPlane x y } {}
+itcl::body Welement::visitDielectricLayer { dielectricLayer x y } {}
+itcl::body Welement::visitRectangleDielectric { rectangleDielectric x y } {}
+
+#---------------------------------------------------------------
+#  Save the name of the HLCSDL object, as we'll need it
+#  later to correlate with the signal names fromm the
+#  MMTL results file.
+#---------------------------------------------------------------
+itcl::body Welement::visitRectangleConductors { rectangleConductors x y } {
+    set signalName $rectangleConductors
+}
+itcl::body Welement::visitTrapezoidConductors { trapezoidConductors x y } {
+    set signalName $trapezoidConductors
+}
+itcl::body Welement::visitCircleConductors { circleConductors x y } {
+    set signalName $circleConductors
+}
+
+#  LLCSDO - low level structures
+itcl::body Welement::visitDielectric { dielectric x y } {}
+
+#---------------------------------------------------------------
+#
+#  Welement::visitConductor
+#
+#  Each time we visit a conductor, store the conductor
+#  area and conductivity for later AC/DC resistance
+#  calculations.  Store them based
+#
+#---------------------------------------------------------------
+itcl::body Welement::visitConductor { conductor x y } {
+    #  Save conductor values
+    set shape [$conductor cget -shape]
+    set conductorArea($signalName) [$shape area]
+    set conductorCircumference($signalName) [$shape circumference]
+    set conductorConductivity($signalName) [$conductor cget -conductivity]
+}
+
+itcl::body Welement::visitGround { ground x y} {}
+itcl::body Welement::visitRectangle { rectangle xp yp } {}
+itcl::body Welement::visitTrapezoid { trapezoid xp yp } {}
+itcl::body Welement::visitCircle { circle xp yp } {}
+itcl::body Welement::visitLayer { layer x y } {}
+

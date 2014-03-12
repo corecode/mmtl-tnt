@@ -1,0 +1,614 @@
+# --------------------------------------------------------*-Tcl-*-
+#
+#  hlcsdl.tcl
+#
+#  High Level Cross Section Description Language (HLCSDL)
+#
+#  This file contains Incr Tcl class declarations for defining
+#  simple transmission line cross sections.  It utilitizes
+#  classes from the Low Level CSDL (LLCSDL) in stackup.itcl
+#
+#  Each of the classes here is sort of a container for a number
+#  of LLCSDL classes.  The LLCSDL classes are constructed in
+#  the global namespace (by naming them with ${auto}) so that
+#  they can easily reference each other.
+#
+#  Classes defined:
+#       GroundPlane
+#       DielectricLayer
+#       RectangleDielectric
+#       RectangleConductors
+#       TrapezoidConductors
+#       CircleConductors
+#
+#  Bob Techentin
+#  January 30, 2001
+#
+#  Copyright 2001-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: csdl_hlcsdl.itcl,v 1.6 2004/07/28 15:40:14 techenti Exp $
+#
+# ----------------------------------------------------------------
+
+package require Itcl
+# package require LLCSDL
+
+package provide csdl 1.0.1
+
+# ----------------------------------------------------------------
+#
+#  HLCSDL Structure
+#
+# ----------------------------------------------------------------
+itcl::class HLCSDLstructure {
+    public variable xOffset 0.0
+    public variable yOffset 0.0
+    variable name
+    variable structure
+    variable shape
+    constructor {} {
+	scan $this "::%s" name
+	lappend Stackup::structureList $this
+    }
+    destructor {
+	# Delete any and all structures and shapes
+	catch {foreach obj $structure {itcl::delete object $obj}}
+	catch {foreach obj $shape {itcl::delete object $obj}}
+	# Remove ourselves from the Stackup
+	catch {
+	    set i [lsearch $::Stackup::structureList $this]
+	    set ::Stackup::structureList \
+		[lreplace $::Stackup::structureList $i $i]
+	}
+    }
+    method width {} {$structure width}
+    method height {} {$structure height}
+    method accept { visitor x y } {
+	#  Cleverly call a visitor based on our class name
+	scan [$this info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+
+	#  Navigate to the structure(s)
+	$structure accept $visitor $x $y
+    }
+}
+
+# ----------------------------------------------------------------
+#
+#  GroundPlane
+#
+# ----------------------------------------------------------------
+
+itcl::class GroundPlane {
+    inherit HLCSDLstructure
+    public variable thickness 1.0
+
+    constructor { args } {
+	eval configure $args
+	set shape [Layer ${this}_#auto -thickness $thickness \
+		-name $name -color blue -description "Ground Plane $name"]
+	set structure [Ground ${this}_#auto -shape $shape]
+    }
+}
+
+itcl::configbody GroundPlane::thickness {
+    if { [info exists shape] } {
+	$shape configure -thickness $thickness
+    }
+}
+
+
+# ----------------------------------------------------------------
+#
+#  DielectricLayer
+#
+# ----------------------------------------------------------------
+itcl::class DielectricLayer {
+    inherit HLCSDLstructure
+    public variable permittivity 1.0
+    public variable permeability 1.0
+    public variable lossTangent 0.0
+    public variable thickness 1.0
+    constructor { args } {
+	eval configure $args
+	set shape [Layer ${this}_#auto -thickness $thickness \
+		-name $name -description "Dielectric $name"]
+	set structure [Dielectric ${this}_#auto -shape $shape \
+		-permittivity $permittivity -permeability $permeability \
+		-lossTangent $lossTangent -shape $shape]
+    }
+}
+
+itcl::configbody DielectricLayer::permittivity {
+    if { [info exists structure] } {
+	$structure configure -permittivity $permittivity
+    }
+}
+itcl::configbody DielectricLayer::permeability {
+    if { [info exists structure] } {
+	$structure configure -permeability $permeability
+    }
+}
+itcl::configbody DielectricLayer::lossTangent {
+    if { [info exists structure] } {
+	$structure configure -lossTangent $lossTangent
+    }
+}
+itcl::configbody DielectricLayer::thickness {
+    if { [info exists shape] } {
+	$shape configure -thickness $thickness
+    }
+}
+
+
+# ----------------------------------------------------------------
+#
+#  RectangleDielectric
+#
+# ----------------------------------------------------------------
+itcl::class RectangleDielectric {
+    inherit HLCSDLstructure
+    public variable number 1
+    public variable pitch 1.0
+    public variable height 1.0
+    public variable width 1.0
+    public variable permittivity 1.0
+    public variable permeability 1.0
+    public variable lossTangent 0.0
+    variable dielectric ""
+
+
+    constructor { args } {
+	eval configure $args
+	set shape [Rectangle ${this}_#auto -height $height -width $width \
+		-name "$name"]
+	update
+
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 [expr { [length $yOffset] }]
+	    lappend structure [Dielectric ${this}_#auto \
+		-permittivity $permittivity -permeability $permeability \
+		-x $x0 -y $y0 -lossTangent $lossTangent -shape $shape ]
+	}
+    }
+    method width {} {
+	return [expr { [length $xOffset] + ($number-1)*[length $pitch] + \
+		$width }]
+    }
+    method height {} {
+	set max 0.0
+	foreach obj $structure {
+	    if { [$obj height] > $max } {
+		set max [$obj height]
+	    }
+	}
+	return $max
+    }
+    method accept { visitor x y } {
+
+	#  Cleverly call a visitor based on our class name
+	scan [$this info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+
+	#  Navigate to each structure
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr { [length $x] + [length $xOffset] + \
+		    [length $pitch]*$i }]
+	    set y0 [expr { $y + [length $yOffset] }]
+	    [lindex $structure $i] accept $visitor $x0 $y0
+	}
+    }
+}
+
+itcl::configbody RectangleDielectric::number {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    itcl::delete object $obj
+	}
+	set structure [list]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 $yOffset
+	    lappend structure [Dielectric ${this}_#auto \
+		    -permittivity $permittivity -permeability $permeability \
+		    -x $x0 -y $y0 -lossTangent $lossTangent -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+}
+itcl::configbody RectangleDielectric::pitch {
+    if { [info exists structure] } {
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    [lindex $structure $i] configure -x $x0
+	}
+    }
+}
+itcl::configbody RectangleDielectric::height {
+    if { [info exists shape] } {
+	$shape configure -height $height
+    }
+}
+itcl::configbody RectangleDielectric::width {
+    if { [info exists shape] } {
+	$shape configure -width $width
+    }
+}
+itcl::configbody RectangleDielectric::permittivity {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    $obj configure -permittivity $permittivity
+	}
+    }
+}
+itcl::configbody RectangleDielectric::permeability {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    $obj configure -permeability $permeability
+	}
+    }
+}
+itcl::configbody RectangleDielectric::lossTangent {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    $obj configure -lossTangent $lossTangent
+	}
+    }
+}
+
+# ----------------------------------------------------------------
+#
+#  RectangleConductors
+#
+# ----------------------------------------------------------------
+itcl::class RectangleConductors {
+    inherit HLCSDLstructure
+    public variable number 1
+    public variable pitch 1.0
+    public variable height 1.0
+    public variable width 1.0
+    public variable conductivity 1.0
+    variable conductor ""
+
+    constructor { args } {
+	eval configure $args
+	set shape [Rectangle ${this}_#auto -height $height -width $width \
+		-name "$name"]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 [length $yOffset]
+	    lappend structure [Conductor ${this}_#auto \
+		    -x $x0 -y $y0 \
+		    -conductivity $conductivity -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+    method width {} {
+	return [expr { [length $xOffset] + ($number-1)*[length $pitch] + \
+		$width }]
+    }
+    method height {} {
+	set max 0.0
+	foreach obj $structure {
+	    if { [$obj height] > $max } {
+		set max [$obj height]
+	    }
+	}
+	return $max
+    }
+    method accept { visitor x y } {
+
+	#  Cleverly call a visitor based on our class name
+	scan [$this info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+
+	#  Navigate to each structure
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr { [length $x] + [length $xOffset] + \
+		    [length $pitch]*$i }]
+	    set y0 [expr { $y + [length $yOffset] }]
+	    [lindex $structure $i] accept $visitor $x0 $y0
+	}
+    }
+}
+
+itcl::configbody RectangleConductors::number {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    itcl::delete object $obj
+	}
+	set structure [list]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 $yOffset
+	    lappend structure [Conductor ${this}_#auto \
+		    -x $x0 -y $y0 \
+		    -conductivity $conductivity -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+}
+itcl::configbody RectangleConductors::pitch {
+    if { [info exists structure] } {
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    [lindex $structure $i] configure -x $x0
+	}
+    }
+}
+itcl::configbody RectangleConductors::height {
+    if { [info exists shape] } {
+	$shape configure -height $height
+    }
+}
+itcl::configbody RectangleConductors::width {
+    if { [info exists shape] } {
+	$shape configure -width $width
+    }
+}
+itcl::configbody RectangleConductors::conductivity {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    $obj configure -conductivity $conductivity
+	}
+    }
+}
+
+
+# ----------------------------------------------------------------
+#
+#  TrapezoidConductors
+#
+# ----------------------------------------------------------------
+itcl::class TrapezoidConductors {
+    inherit HLCSDLstructure
+    public variable number 1
+    public variable pitch 1.0
+    public variable height 1.0
+    public variable topWidth 1.0
+    public variable bottomWidth 1.0
+    public variable conductivity 1.0
+    variable conductor
+    constructor { args } {
+	eval configure $args
+	set shape [Trapezoid ${this}_#auto -height $height \
+		-topWidth $topWidth -bottomWidth $bottomWidth \
+		-name "$name"]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 [length $yOffset]
+	    lappend structure [Conductor ${this}_#auto \
+		    -x $x0 -y $y0 \
+		    -conductivity $conductivity -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+    method width {} {
+	return [expr { [length $xOffset] + ($number-1)*[length $pitch] + \
+		([length $topWidth] + [length $bottomWidth]) * 0.5 }]
+    }
+    method height {} {
+	set max 0.0
+	foreach obj $structure {
+	    if { [$obj height] > $max } {
+		set max [$obj height]
+	    }
+	}
+	return $max
+    }
+    method accept { visitor x y } {
+	#  Cleverly call a visitor based on our class name
+	scan [$this info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+
+	#  Navigate to each structure
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $x] + [length $xOffset] + \
+		    [length $pitch]*$i}]
+	    set y0 [expr { [length $y] + [length $yOffset] }]
+	    [lindex $structure $i] accept $visitor $x0 $y0
+	}
+    }
+}
+
+itcl::configbody TrapezoidConductors::number {
+    if { [info exists structure] } {
+	foreach obj $structure {itcl::delete object $obj}
+	set structure [list]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 [length $yOffset]
+	    lappend structure [Conductor ${this}_#auto \
+		    -x $x0 -y $y0 \
+		    -conductivity $conductivity -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+}
+itcl::configbody TrapezoidConductors::pitch {
+    if { [info exists structure] } {
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    [lindex $structure $i] configure -x $x0
+	}
+    }
+}
+itcl::configbody TrapezoidConductors::height {
+    if { [info exists shape] } {
+	$shape configure -height $height
+    }
+}
+itcl::configbody TrapezoidConductors::topWidth {
+    if { [info exists shape] } {
+	$shape configure -topWidth $topWidth
+    }
+}
+itcl::configbody TrapezoidConductors::bottomWidth {
+    if { [info exists shape] } {
+	$shape configure -bottomWidth $bottomWidth
+    }
+}
+itcl::configbody TrapezoidConductors::conductivity {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    $obj configure -conductivity $conductivity
+	}
+    }
+}
+
+
+# ----------------------------------------------------------------
+#
+#  CircleConductors
+#
+# ----------------------------------------------------------------
+itcl::class CircleConductors {
+    inherit HLCSDLstructure
+    public variable number 1
+    public variable pitch 1.0
+    public variable diameter 1.0
+    public variable conductivity 1.0
+    variable conductor
+    constructor { args } {
+	eval configure $args
+	set shape [Circle ${this}_#auto -diameter $diameter \
+		-name "$name"]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] - $diameter + [length $pitch]*$i}]
+	    set y0 [length $yOffset]
+	    lappend structure [Conductor ${this}_#auto \
+		    -x $x0 -y $y0 \
+		    -conductivity $conductivity -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+    method width {} {
+	return [expr { [length $xOffset] + ($number-1)*[length $pitch] \
+		+ $diameter }]
+    }
+    method height {} {
+	set max 0.0
+	foreach obj $structure {
+	    if { [$obj height] > $max } {
+		set max [$obj height]
+	    }
+	}
+	return $max
+    }
+    method accept { visitor x y } {
+	#  Cleverly call a visitor based on our class name
+	scan [$this info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+
+	#  Navigate to each structure
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $x] + [length $xOffset] + \
+		    [length $pitch]*$i}]
+	    set y0 [expr { [length $y] + [length $yOffset] }]
+	    [lindex $structure $i] accept $visitor $x0 $y0
+	}
+    }
+}
+
+itcl::configbody CircleConductors::number {
+    if { [info exists structure] } {
+	foreach obj $structure {itcl::delete object $obj}
+	set structure [list]
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    set y0 [length $yOffset]
+	    lappend structure [Conductor ${this}_#auto \
+		    -x $x0 -y $y0 \
+		    -conductivity $conductivity -shape $shape \
+		    -description "${name}-${i}"]
+	}
+    }
+}
+itcl::configbody CircleConductors::pitch {
+    if { [info exists structure] } {
+	for {set i 0} {$i<$number} {incr i} {
+	    set x0 [expr {[length $xOffset] + [length $pitch]*$i}]
+	    [lindex $structure $i] configure -x $x0
+	}
+    }
+}
+itcl::configbody CircleConductors::diameter {
+    if { [info exists shape] } {
+	$shape configure -diameter $diameter
+    }
+}
+itcl::configbody CircleConductors::conductivity {
+    if { [info exists structure] } {
+	foreach obj $structure {
+	    $obj configure -conductivity $conductivity
+	}
+    }
+}
+
+
+
+
+# --------------------------------------------------------------------
+#
+# itcl::class Stackup
+#
+#    Defines a layer stackup - the overall definition of a
+#    transmission line cross section.  The layer Stackup is
+#    essentially a static class.  There is only one.  
+#
+#    Structures add themselves to the structure list as they are 
+#    constructed.  The order of this list is important, as
+#    the Y coordinate of each of the structures depends upon the
+#    structures before it in the Stackup.
+#
+# options
+#
+#  -structureList
+#     Ordered list of structures in the layer stackup.
+#
+#  -couplingLength
+#     Coupling length of the transmission line
+#
+#  - defaultLengthUnits
+#     Default length units applied to the cross section.
+#
+# --------------------------------------------------------------------
+itcl::class Stackup {
+    public common structureList {}
+    public common couplingLength 0.0
+    public common riseTime 0.0
+    public common frequency 1e9
+    public common defaultLengthUnits ""
+    proc width {} {
+	set max 0
+	foreach s $structureList {
+	    set w [$s width]
+	    if {$w > $max} {
+		set max $w
+	    }
+	}
+	return $max
+    }
+    proc height { } {
+	set h 0
+	#  Add up the heights of the Layers
+	foreach struct $structureList {
+	    if {[$struct isa GroundPlane] || [$struct isa DielectricLayer]} {
+		set h [expr {$h + [$struct height]}]
+	    }
+	}
+	#  Add on final structure even if it isn't
+	#  a Layer (like microstrip conductors)
+	if { ! [$struct isa GroundPlane] && ! [$struct isa DielectricLayer]} {
+	    set h [expr {$h + [$struct height]}]
+	}
+	return $h
+    }
+
+    proc accept { visitor args } {
+	eval $visitor visitStackup ::Stackup $args
+    }
+}
+
+
+

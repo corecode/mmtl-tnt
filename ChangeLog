@@ -1,0 +1,898 @@
+ChangeLog
+
+ 
+2004-09-10 techenti
+
+	Tagged TNT 1.2.1
+
+	* calcCAP/lib/calcCAP.tcl 1.8 (changed): Check for zero thickness
+	        dielectrics and ground planes.
+
+
+        * gui/gui_initialize.tcl 1.29 (changed): Fixed sourceforge bug
+	        1015570 "Can't run Wavelet RL calculator".  If
+	        [auto_execok] found 'tclsh', then everything was fine, but
+	        you need to make a list out of
+                [info nameofexecutable] to protect it from spaces in the
+		path name.  
+
+	* bem/lib/bem_welement.itcl 1.6 (changed): Fixed unit conversion
+		bug, sourceforge bug 1025984 "Bugs in Rs and R0."
+ 
+2004-08-02 techenti
+	
+        * gui/gui_initialize.tcl 1.28 (changed): Corrected w-element
+	        object creation/destruction. (sourceforge tracker 1001977)
+ 
+2004-07-26 techenti
+	
+        * gui/canvas_functions.tcl 1.7 (changed): Removed dependence on
+	        tcllib (fileutils::tempfile).
+ 
+
+2004-07-29 techenti
+
+	Tagged TNT 1.2.1
+
+	* examples/example-microstrip-2.xsctn 1.3 (changed):
+		Added ground thickness and corrected conductivity.
+	* doc/user-guide.tex 1.6 (changed):
+		Added limitations for wavelet simulators.
+	* examples/example-stripline-2.xsctn 1.3 (changed):
+		Corrected conductivity.
+	* calcCAP/lib/calcCAP.tcl 1.7 (changed):
+		Corrected RectangleDielectric support, although 
+		the simulator does not support it.
+	* calcRL/lib/calcRL.tcl 1.8 (changed):
+		Removed hardcoded ground plane thickness (10 microns)
+
+2004-07-28 techenti
+	* bem/src/math_library.cpp 1.2 (changed):
+	* bem/src/nmmtl_det_arc_intersections.cpp 1.2 (changed):
+	* bem/src/nmmtl_det_intersections.cpp 1.2 (changed):
+	* bem/src/nmmtl_fill_die_gaps.cpp 1.3 (changed):
+	* bem/src/nmmtl_find_ground_planes.cpp 1.3 (changed):
+	* bem/src/nmmtl_find_nu.cpp 1.2 (changed):
+	* bem/src/nmmtl_orphans.cpp 1.3 (changed):
+	* bem/src/nmmtl_overlap_parallel_seg.cpp 1.2 (changed):
+		Added "\n" to printed ELECTRO warnings and error messages.
+	* bem/lib/bem_welement.itcl 1.5 (changed):
+		Added visitRectangleDielectric to fix error when 
+		generating W elements.
+	* bem/src/nmmtl.cpp 1.4 (changed):
+	* bem/src/nmmtl_fill_die_gaps.cpp 1.2 (changed):
+	* bem/src/nmmtl_find_ground_planes.cpp 1.2 (changed):
+	* bem/src/nmmtl_form_die_subseg.cpp 1.2 (changed):
+	* bem/src/nmmtl_merge_die_subseg.cpp 1.2 (changed):
+	* bem/src/nmmtl_orphans.cpp 1.2 (changed):
+		Changed stderr to stdout for warnings and diagnostics.
+	* calcCAP/lib/calcCAP.tcl 1.6 (changed):
+		Typo.  (Misspelled -height as -thickness.)
+	* calcCAP/lib/calcCAP.tcl 1.5 (changed):
+	* calcRL/lib/calcRL.tcl 1.7 (changed):
+		Added RectangleDielectrics
+	* bem/lib/bem_sweep.tcl 1.7 (changed):
+	* csdl/csdl_hlcsdl.itcl 1.6 (changed):
+		Added ground plane thickness.
+
+2004-07-26 techenti
+	* doc/user-guide.tex 1.5 (changed):
+		Added license section.  Updated Windows installation 
+		and package dependencies.
+	* gui/gui_help.tcl 1.7 (changed):
+		Fixed for file names with spaces.
+	* gui/canvas_functions.tcl 1.7 (changed):
+		Removed dependence on tcllib (fileutils::tempfile).
+	
+2004-07-21 techenti
+
+	Tagged TNT 1.2.0
+	
+	* Many files
+		Added examples and docs, README, THANKS,
+		INSTALL, and other files for distribution.
+	* gui (all files)
+		Bumped gui package version to 2.0
+
+2004-07-19 techenti
+	* gui/gui_help.tcl 1.4 (changed):
+	* tnt.tcl 1.22 (changed):
+		Added HTML online help.
+	* csdl/csdl.tcl 1.11 (changed):
+		Fixed bug in reading/writing coupling length 
+		and translating to default units
+	* gui/canvas_functions.tcl 1.6 (changed):
+		Fixed up windows printing, 
+		working around Iwidgets bug.
+	* INSTALL-SPPDG 1.1 (added):
+		Initial Checkin
+	* bem/src/nmmtl.cpp 1.3 (changed):
+		Make stdout line buffered, so that it 
+		behaves better at the end of a pipe.
+	* gui/gui_initialize.tcl 1.25 (changed):
+		Streamlined reading in files, copying 
+		data to global variables.
+	* doc/user-guide.tex 1.2 (changed):
+		Updated with reviewer comments, and 
+		reformatted some paragraphs.
+
+2004-06-30 techenti
+	* gui/gui_elements.tcl 1.15 (changed):
+	* gui/gui_initialize.tcl 1.24 (changed):
+		Corrected file name handling for Save, SaveAs, etc.
+		Corrected title-reading bug.
+	* gui/canvas_functions.tcl 1.5 (changed):
+		Corrected zoom drag so that you can start and 
+		end at any corner.
+2004-06-29 techenti
+	* calcCAP/configure.ac 1.4 (changed):
+	* calcRL/configure.ac 1.6 (changed):
+		Added check for sys/times.h
+	* tnt.tcl 1.21 (changed):
+		Corrected splash screen startup.
+	* calcCAP/src/calcCAP.cpp 1.5 (changed):
+	* calcRL/src/calcRL.cpp 1.5 (changed):
+		Made CPU timing optional for systems (like -mno-cygwin) 
+		without sys/times.h
+
+2004-06-28 techenti
+	* calcCAP/src/calcCAP.cpp 1.4 (changed):
+	* calcRL/src/calcRL.cpp 1.4 (changed):
+		Added #include <stdio.h> for sprintf().
+	* Makefile.am 1.6 (changed):
+	* configure.ac 1.6 (changed):
+		Added calcRL.
+	* calcCAP/configure.ac 1.3 (changed):
+	* calcRL/configure.ac 1.4 (changed):
+		Added cygwin support (with -mno-cygwin flag)
+	* calcRL/configure.ac 1.5 (changed):
+		Added cygwin support (with -mno-cygwin flag) (typo!)
+	* gui/Makefile.am 1.8 (changed):
+		Added style.tcl.
+	* gui/gui_initialize.tcl 1.23 (changed):
+		Changed (obsoleted) _open_existing to guiOpenExisting
+	* calcRL/src/calcRL.cpp 1.3 (changed):
+	* calcRL/src/cmplxvec.h 1.2 (changed):
+		Corrected for ANSI C++ timing and operator definitions.
+	* gui/gui_initialize.tcl 1.22 (changed):
+		Removed "2>@stdout" from pipeline opens, which wasn't 
+		working on Win32.
+		(Where did you read about that, anyway??)
+	* gui/gui_build.tcl 1.24 (changed):
+		Removed Tree lines from Layer Stackup window.
+
+2004-06-24 techenti
+	* gui/canvas_functions.tcl 1.4 (changed):
+	* gui/gui_elements.tcl 1.14 (changed):
+		Corrected bugs selecting items in the canvas.
+
+2004-06-23 techenti
+	* tnt.tcl 1.20 (changed):
+		Added "view results file" to wavelet simulator menu
+	* gui/gui_initialize.tcl 1.21 (changed):
+		Spiffed up guiPopupResultsFile, and changed most calls of 
+		guiPopupFile to use it.
+
+2004-06-22 amundsen
+	* sppdgTcllib/MeasTextGui/MeasTextGui.itcl 1.5 (changed):
+		pasted in some option database code from Bob Techentin's 
+		tnt code
+		to try and make things a little prettier - still needs 
+		some work.
+
+2004-06-08 zahn
+	* sppdgTcllib/sgraph/sgraph.tcl 1.11 (changed):
+		Added the processing of arguments being passed in on the 
+		create of sgraph
+
+2004-06-08 techenti
+	* gui/splash.tcl 1.2 (changed):
+		Added free software notice and button to display license.
+	* gui/gui_build.tcl 1.23 (changed):
+	* gui/gui_elements.tcl 1.13 (changed):
+	* gui/gui_initialize.tcl 1.20 (changed):
+		Changed ::scriptDir to ::gui::scriptDir, which helps find 
+		property list files.
+	* tnt.tcl 1.19 (changed):
+		Updated and sped up splash screen code by deferring 
+		'package require gui.'
+
+2004-06-08 amundsen
+	* sppdgTcllib/MeasTextGui/MeasTextGui.itcl 1.4 (changed):
+		Fixed package require MeasText line
+	* sppdgTcllib/MeasTextGui/MeasTextGui.itcl 1.3 (changed):
+		Post 06/04/2004 code review :
+			Fixed vender spelling to vendor
+			Moved initializing of variables from constructor into 
+		class definition
+			Created a tree widget to search for measure.txt files 
+		instead of a list
+			Started to add toplevel class, but not working yet
+			Added id string
+
+2004-06-07 zahn
+	* sppdgTcllib/sgraph/sgraph.tcl 1.10 (changed):
+		Added SaveMetafile routine.
+
+2004-06-07 techenti
+	* gui/pkgIndex.tcl 1.7 (changed):
+	* gui/style.tcl 1.1 (added):
+		Added 'style.tcl' for improving the look under CDE and 
+		Unix.
+	* tnt.tcl 1.18 (changed):
+		Added 'style.tcl' to GUI package, so separate package 
+		require is not needed.
+
+2004-06-04 amundsen
+	* sppdgTcllib/MeasText/MeasText.itcl 1.4 (changed):
+		Added file id string
+	* sppdgTcllib/MeasText/MeasText.itcl 1.3 (changed):
+		Post 06/04/2004 code review :
+			Fixed vender spelling to vendor
+			Added getFooter, which returns only the footer of the 
+		current test
+			Moved initializing of variables from constructor into 
+		class definition
+			Cleaned up class definition inline methods for 
+		readability
+
+2004-06-03 techenti
+	* gui/gui_build.tcl 1.22 (changed):
+	* gui/gui_initialize.tcl 1.19 (changed):
+		Added calcCAP log dialog and run procedure.
+	* tnt.tcl 1.17 (changed):
+		Added calcCAP to menus.  Corrected path name error.
+	* gui/gui_build.tcl 1.21 (changed):
+	* gui/gui_initialize.tcl 1.18 (changed):
+		Added new code to run calcRL simulator
+	* gui/gui_initialize.tcl 1.17 (changed):
+		Added writeSweptCvsFile which writes csv files and 
+		displays them.
+	* calcCAP/lib/calcCAP.tcl 1.4 (changed):
+		Changed genInputFile procedure name and changed execution 
+		to use auto_execok.
+	* bem/lib/bem_iterate.tcl 1.5 (changed):
+		Changed iterate dialog to radiobuttons so only one 
+		parameter can be selected.
+	* calcRL/lib/calcRL.tcl 1.6 (changed):
+		Changed names.  Added frequency parameter to genInputFile.
+	* csdl/csdl.tcl 1.10 (changed):
+		Corrected couplingLength, which must be written to 
+		xsection file in "meters."
+	* calcCAP/lib/pkgIndex.tcl 1.3 (changed):
+	* calcRL/lib/pkgIndex.tcl 1.4 (changed):
+		Corrected package name (capitalization)
+	* tnt.tcl 1.14 (changed):
+		Fixed iterate menu.  Removed Fee2D menu.
+	* tnt.tcl 1.16 (changed):
+		Made calcRL and calCAP applications "optional" in the main 
+		menu.
+		Improved the "developer mode" auto_path and path code.
+	* bem/lib/bem_parameters.tcl 1.4 (changed):
+		Removed "puts" that printed data on console, and return 
+		output file name to caller.
+	* gui/gui_initialize.tcl 1.16 (changed):
+		Save xsection file AFTER user enters values in Run BEM 
+		dialog.
+		Clear text in BEM run log window each time.
+	* tnt.tcl 1.15 (changed):
+		Updated BEM Sweep and Iterate csv file menu entries.
+		Removed 2-D graphs of swept and iterated results. (which 
+		don't work)
+
+2004-06-02 techenti
+	* bem/lib/bem_sweep.tcl 1.4 (changed):
+		Added new slick runSweep dialog with combines all 
+		parameters, checkbuttons, and entry widgets into a single 
+		dialog.  No functionality yet.
+	* csdl/csdl_hlcsdl.itcl 1.5 (changed):
+		Improved automatic naming using #auto.
+		Corrected object destruction.
+		Removed debugging 'puts' statements.
+	* csdl/csdl.tcl 1.9 (changed):
+		Removed 'puts stderr' in csdlReadTCL, and just accept 
+		default error messages from sourcing a model file.
+	* bem/lib/bem_iterate.tcl 1.4 (changed):
+	* bem/lib/bem_sweep.tcl 1.5 (changed):
+		Updated to work with [auto_execok].  Changed some 
+		toplevels to Dialogs.
+		Replaced LabelEntry calls with Tk labels and entries.
+
+
+2004-05-24 techenti
+	* gui/canvas_functions.tcl 1.3 (changed):
+		Moved zooming bindtags definitions from gui_build.tcl.
+		Added comments for function arguments and results.
+		Added check for invalid zoom factor.
+		Reformatted expressions with spaces to improve readability 
+		and reliability.
+	* gui/gui_build.tcl 1.20 (changed):
+		Moved zooming bindtags definitions to 
+		canvas_functions.tcl.
+
+
+2004-05-05 techenti
+	* tnt.tcl 1.13 (changed):
+		Added "developer mode" env(PATH), new "as" style, and 
+		revised BEM MMTL menus.
+	* bem/lib/bem_welement.itcl 1.4 (changed):
+		Added code to correctly convert from MMTL signal names to 
+		csdl object names.
+	* gui/gui_build.tcl 1.19 (changed):
+		Added two new dialogs for BEM run (control) and run log.
+	* gui/gui.tcl 1.10 (changed):
+		Changed guiPopupFile to allow many dialogs.
+	* gui/gui_initialize.tcl 1.14 (changed):
+		Improved BEM MMTL run and HSPICE W-element generation.
+		Added more "reset" code to guiNEW (file->new).
+	* gui/gui_initialize.tcl 1.15 (changed):
+		Removed popup busy windows and references to frame 
+		::gui::tf1.
+	* bem/lib/bem.tcl 1.6 (changed):
+		Run 'bem' from the path (auto_execok) instead of from the 
+		BEM library.
+
+2004-04-26 techenti
+	* gui/gui_build.tcl 1.18 (changed):
+		Added tab-order code to structure dialogs.  Since widgets 
+		are created out-of-order, tab behavior was a little odd.
+	* gui/canvas_functions.tcl 1.2 (changed):
+		Changed annotation flag to a variable toggled by a GUI 
+		checkbox.
+		Moved object name tag to first position (in 
+		gui_canvas.itcl).
+		Put windows print utility (prfile32.exe) into path (in 
+		tnt.tcl).
+	* tnt.tcl 1.12 (changed):
+		Menu updates.  Added script directory to env(PATH) for 
+		[auto_execok].
+	* gui/gui_initialize.tcl 1.13 (changed):
+		Streamlined File "new", "open", "save", and "save as" 
+		functions.
+		Removed support for "old" csdl format and graphic format.
+		Renamed "_read_the_file" to "_read_cross_section_file"
+	* gui/gui_canvas.itcl 1.7 (changed):
+		Streamlined descriptions, tag names (which put the objects 
+		first), and color selection.  Changed colors to RGB 
+		values, which will work on all systems.
+
+2004-04-23 techenti
+	* sppdgTcllib/console/Makefile.am 1.4 (changed):
+	* sppdgTcllib/getFilePreview/Makefile.am 1.2 (changed):
+	* sppdgTcllib/sgraph/Makefile.am 1.3 (changed):
+		Corrected installation directory (pkglibdir)
+	* sppdgTcllib/Makefile.am 1.2 (changed):
+		Corrected installation directory and defined a macro for 
+		controlling subdirectory makes so that they go in the 
+		right place, too.
+
+2004-04-22 techenti
+	* gui/gui.tcl 1.9 (changed):
+		Added 'namespace export' of new canvas functions.
+		Added drainEventQueue function for Windows double-click 
+		file selection bug.
+	* gui/Makefile.am 1.4 (changed):
+		Added canvas_functions.tcl
+	* gui/pkgIndex.tcl 1.6 (changed):
+		Added new file:  canvas_functions.tcl
+	* gui/gui_elements.tcl 1.12 (changed):
+		Added new functions for create/modify/delete cross section 
+		structures based on new dialogs in gui_build.tcl.  Removed 
+		some obsolete code.
+	* gui/Makefile.am 1.5 (changed):
+		Added splash.tcl, MayoSPPDGlogo.gif, and moved data files 
+		to the DATA primary.
+	* Makefile.am 1.5 (changed):
+	* configure.ac 1.5 (changed):
+		Added sppdgTcllib
+	* bootstrap 1.6 (changed):
+		Added subdirectory loop, so now you just have to run this 
+		bootstrap to take care of the whole application.
+	* gui/gui_canvas.itcl 1.6 (changed):
+		Cleaned up structure names and canvas tag generation.
+	* sppdgTcllib/bootstrap 1.2 (changed):
+	* bootstrap 1.7 (changed):
+		Fixed subdirectory loop
+	* gui/gui_initialize.tcl 1.12 (changed):
+		Handled MSWindows file dialog double-click bug.
+		Updated canvas and tree drawing code.
+	* INSTALL 1.1 (added):
+		Initial revision of build/install instructions.
+	* sppdgTcllib/Makefile.am 1.1 (added):
+	* sppdgTcllib/bootstrap 1.1 (added):
+	* sppdgTcllib/configure.ac 1.1 (added):
+		Initial version.
+	* tnt.tcl 1.11 (changed):
+		Menu updates and slight changes to top level GUI frames.
+	* gui/gui_build.tcl 1.17 (changed):
+		Rewrote cross section structure data entry code from 
+		notebook style frames on the main window into individual 
+		data entry dialogs.  Moved non-gui-build code to 
+		gui_elements.tcl and canvas_functions.tcl.
+	* gui/Makefile.am 1.6 (changed):
+	* gui/Makefile.am 1.7 (changed):
+		Typo correction.
+	* bem/Makefile.am 1.5 (changed):
+	* bem/bootstrap 1.3 (changed):
+	* bem/configure.ac 1.10 (changed):
+		Updated copyrights.
+	* gui/canvas_functions.tcl 1.1 (added):
+		canvas support functions
+
+2004-04-21 techenti
+	* gui/gui_canvas.itcl 1.5 (changed):
+		Added shape tags for zooming functions and canvas 
+		raise/lower code.  Removed the stackup thickness 
+		annotation.  Changed layers from stippled to solid colors 
+		(which print better).
+
+2004-04-12 techenti
+	* gui/conductivity.list 1.3 (changed):
+		Changed "siemens/meter" to "S/m" to accomodate shorter 
+		entry boxes (less typing too).
+	* gui/gui.tcl 1.8 (changed):
+		Changed entry field widths to 10 (characters)
+	* gui/gui_elements.tcl 1.11 (changed):
+		Copied materials properties lists into real lists (and not 
+		just arrays)
+	* gui/gui_build.tcl 1.16 (changed):
+		Copy material lists into true lists (not just arrays).
+		Completely replaced canvas zoom code.
+		Revamped component entry forms to use two columns of Tk 
+		entry widgets.
+	* gui/MayoSPPDGlogo.README 1.1 (added):
+	* gui/MayoSPPDGlogo.gif 1.1 (added):
+	* gui/splash.tcl 1.1 (added):
+		Mayo-SPPDG Splash Screen
+
+2004-03-09 zahn
+	* units/INSTALL 1.1 (added):
+		Add the text file INSTALL to show how to build/install 
+		units
+
+2004-02-13 techenti
+	* csdl/csdl.test 1.1 (added):
+		Initial checkin
+
+2004-02-12 techenti
+	* sppdgTcllib/console/console.tcl 1.8 (changed):
+		Added initial set of variable and check for race 
+		conditions
+	* sppdgTcllib/console/console_demo.tcl 1.3 (changed):
+		Changed package loading to same directory as demo script
+	* sppdgTcllib/console/console.test 1.1 (added):
+		Initial checkin
+	* bem/lib/bem.tcl 1.5 (changed):
+	* bem/lib/bem_gpge.itcl 1.4 (changed):
+	* bem/lib/bem_graphs.itcl 1.3 (changed):
+	* bem/lib/bem_iterate.tcl 1.3 (changed):
+	* bem/lib/bem_parameters.tcl 1.3 (changed):
+	* bem/lib/bem_sweep.tcl 1.3 (changed):
+	* bem/lib/bem_view.tcl 1.3 (changed):
+	* bem/lib/bem_welement.itcl 1.3 (changed):
+	* bem/lib/pkgIndex.tcl 1.6 (changed):
+	* calcRL/Makefile.am 1.4 (changed):
+	* calcRL/configure.ac 1.3 (changed):
+	* calcRL/lib/calcRL.tcl 1.5 (changed):
+	* calcRL/lib/calcRL_exe.tcl 1.4 (changed):
+	* calcRL/lib/pkgIndex.tcl 1.3 (changed):
+	* calcRL/lib/xmgrPlotParamaters 1.2 (changed):
+	* calcRL/lib/xmgrPlotParameters 1.2 (changed):
+		Updated copyrights.
+
+2004-02-11 techenti
+	* sppdgTcllib/console/INSTALL 1.1 (added):
+	* sppdgTcllib/console/README 1.3 (changed):
+	* sppdgTcllib/console/console.tcl 1.7 (changed):
+		Brushed up docs, moved them to README.
+	* sppdgTcllib/console/console.tcl 1.6 (changed):
+		Updated documentation, per code review suggestions.
+
+2004-02-10 techenti
+	* sppdgTcllib/console/configure.ac 1.3 (changed):
+	* sppdgTcllib/console/console.tcl 1.5 (changed):
+	* sppdgTcllib/console/pkgIndex.tcl 1.4 (changed):
+		Bumped version number to 1.1
+	* sppdgTcllib/console/console.tcl 1.4 (changed):
+		Corrected trace variable name resolution
+	* sppdgTcllib/console/Makefile.am 1.3 (changed):
+	* sppdgTcllib/sgraph/Makefile.am 1.2 (changed):
+		Fixed install directory to numbered subdirectory of 
+		$(prefix)
+	* sppdgTcllib/console/console_demo.tcl 1.1 (added):
+	* sppdgTcllib/getFilePreview/Makefile.am 1.1 (added):
+	* sppdgTcllib/getFilePreview/bootstrap 1.1 (added):
+	* sppdgTcllib/getFilePreview/configure.ac 1.1 (added):
+		Initial checkin
+	* sppdgTcllib/console/console_demo.tcl 1.2 (changed):
+		Set correct path to sppdgTcllib
+	* sppdgTcllib/sgraph/configure.ac 1.2 (changed):
+		Updated copyright and INIT macro.
+
+2004-02-09 techenti
+	* csdl/Makefile.am 1.4 (changed):
+	* csdl/bootstrap 1.4 (changed):
+	* csdl/configure.ac 1.5 (changed):
+	* csdl/csdl.tcl 1.8 (changed):
+	* csdl/csdl_hlcsdl.itcl 1.4 (changed):
+	* csdl/csdl_llcsdl.itcl 1.3 (changed):
+	* csdl/csdl_shapes.itcl 1.3 (changed):
+	* csdl/pkgIndex.tcl 1.4 (changed):
+	* gui/configure.ac 1.4 (changed):
+	* gui/gui.tcl 1.7 (changed):
+	* gui/gui_build.tcl 1.15 (changed):
+	* gui/gui_canvas.itcl 1.4 (changed):
+	* gui/gui_elements.tcl 1.10 (changed):
+	* gui/gui_help.tcl 1.3 (changed):
+	* gui/gui_initialize.tcl 1.11 (changed):
+	* gui/gui_xmission.tcl 1.7 (changed):
+	* gui/pkgIndex.tcl 1.5 (changed):
+		Added proper copyrights.
+	* gui/gui_canvas.itcl 1.3 (changed):
+	* gui/gui_elements.tcl 1.9 (changed):
+	* gui/gui_help.tcl 1.2 (changed):
+	* gui/gui_initialize.tcl 1.10 (changed):
+	* gui/gui_xmission.tcl 1.6 (changed):
+	* gui/pkgIndex.tcl 1.4 (changed):
+		Bumped package version to 1.1.
+	* gui/gui.tcl 1.6 (changed):
+	* gui/gui_build.tcl 1.14 (changed):
+		Changed console code to use new sppdgTcllib package.
+		Bumped package version to 1.1.
+
+2004-02-05 techenti
+	* tnt.tcl 1.9 (changed):
+		Cleaned up package startup and added new tkcon console 
+		code.
+	* sppdgTcllib/console/Makefile.am 1.2 (changed):
+	* sppdgTcllib/console/configure.ac 1.2 (changed):
+	* sppdgTcllib/console/console.tcl 1.3 (changed):
+	* sppdgTcllib/console/pkgIndex.tcl 1.3 (changed):
+	* Makefile.am 1.4 (changed):
+	* bootstrap 1.5 (changed):
+	* configure.ac 1.4 (changed):
+	* mmtl_build.tcl 1.2 (changed):
+	* mmtl_canvas.itcl 1.2 (changed):
+	* mmtl_elements.tcl 1.2 (changed):
+	* mmtl_help.tcl 1.2 (changed):
+	* tnt.tcl 1.10 (changed):
+	* units/Makefile.am 1.2 (changed):
+	* units/bootstrap 1.4 (changed):
+	* units/configure.ac 1.3 (changed):
+	* units/units.tcl 1.2 (changed):
+	* units/units.test 1.2 (changed):
+	* units/units.xml 1.2 (changed):
+		Updated copyrights and headers
+
+2004-01-22 techenti
+	* sppdgTcllib/console/
+		Initial Checkin
+
+2004-01-21 techenti
+	* configure.ac 1.3 (changed):
+		Added subdirs.
+	* bem/bootstrap 1.2 (changed):
+	* bootstrap 1.4 (changed):
+	* calcCAP/bootstrap 1.2 (changed):
+	* csdl/bootstrap 1.3 (changed):
+	* gui/bootstrap 1.4 (changed):
+	* units/bootstrap 1.3 (changed):
+		Complete replacement
+	* Makefile.am 1.3 (changed):
+		Corrected name.  Added subdirs.
+	* tnt.tcl 1.8 (changed):
+		Removed dependence on BWidget 1.2.1
+	* calcCAP/src/calcCAP.cpp 1.3 (changed):
+		Removed non-portable CPU time code.
+
+2004-01-08 zahn
+	* sppdgTcllib/sgraph/sgraph.tcl 1.9 (changed):
+		Fixed a bug for Zoom-all -- graph index wasn't being 
+		checked correctly.
+	* sppdgTcllib/sgraph/sgraph.tcl 1.8 (changed):
+		added calls to save, print, and set print options
+
+2004-01-07 zahn
+	* sppdgTcllib/sgraph/sgraph.tcl 1.7 (changed):
+		clean up, added help text to the icons for zoom-in 
+		zoom-out zoom-all save and print
+
+2004-01-05 techenti
+	* sppdgTcllib/getFilePreview/getFilePreview.tcl 1.2 (changed):
+
+2003-12-29 zahn
+	* sppdgTcllib/sgraph/sgraph.tcl 1.5 (changed):
+	* sppdgTcllib/sgraph/sgraph.tcl 1.6 (changed):
+	* gui/gui_initialize.tcl 1.9 (changed):
+		*** empty log message ***
+
+2003-11-10 zahn
+	* bem/lib/bem.tcl 1.4 (changed):
+	* gui/gui_initialize.tcl 1.8 (changed):
+	* gui/gui_xmission.tcl 1.5 (changed):
+		
+		Added extra checking for running the MMTL simulation
+
+2003-11-07 zahn
+	* gui/gui_build.tcl 1.12 (changed):
+		Added a button for viewing MMTL results file
+	* gui/gui_build.tcl 1.13 (changed):
+	* gui/gui_initialize.tcl 1.7 (changed):
+		Fixed a bug where the MMTL=>Save was not setting 
+		::Test(xsctn) if called with no file name defined
+	* gui/gui_elements.tcl 1.8 (changed):
+		Wrote the lower width of a trapezoid to the 
+		<node>.result_log
+
+2003-11-05 zahn
+	* gui/gui_build.tcl 1.11 (changed):
+		*** empty log message ***
+
+2003-10-25 zahn
+	* gui/gui_build.tcl 1.10 (changed):
+		Changed the routines called on the MMTL buttons so the 
+		xsctn filename 
+		can be saved in xmission
+	* gui/gui_initialize.tcl 1.6 (changed):
+		Changes to allow xmission to save the xsctn filename
+	* gui/gui_xmission.tcl 1.4 (changed):
+		Removed an out-dated comment
+
+2003-10-24 techenti
+	* bem/configure.ac 1.9 (changed):
+		Added CC="gcc -mno-cygwin" definition for cygwin builds 
+		because
+		configure script uses gcc for many tests.
+	* sppdgTcllib/sgraph/sgraph.tcl 1.4 (changed):
+		Changed unix printer finding code from "open /bin/lpstat" 
+		to "exec".
+
+2003-10-21 zahn
+	* gui/gui_xmission.tcl 1.3 (changed):
+		Removed call to RetrieveBEMResults since no longer needed.
+
+2003-08-02 techenti
+	* bem/lib/pkgIndex.tcl 1.5 (changed):
+		Ensured that global variables ::env and ::tcl_platform are 
+		global.
+
+2003-08-01 techenti
+	* gui/gui_build.tcl 1.9 (changed):
+		Replaced _setNodeName proc, which was accidentally 
+		removed.
+
+2003-07-01 techenti
+	* gui/gui.tcl 1.5 (changed):
+	* gui/gui_build.tcl 1.8 (changed):
+	* gui/gui_elements.tcl 1.7 (changed):
+		Removed dependence on BWidget 1.2.1 (labeled combobox)
+		Reorganized multi-frame data entry windows into BWidget 
+		PaneManager
+
+2003-06-26 techenti
+	* gui/gui_build.tcl 1.7 (changed):
+		Added "Dielectric Rectangle" frame and button.
+	* gui/gui_initialize.tcl 1.5 (changed):
+		Added "Rectangle Dielectric", removed excessive warning 
+		popup when MMTL was successful, and put some global 
+		variables into the ::gui namespace.
+	* gui/gui_elements.tcl 1.6 (changed):
+		Added "Rectangle Dielectrics"
+	* csdl/csdl.tcl 1.7 (changed):
+		Added "RectangleDielectric"
+	* bem/lib/bem_gpge.itcl 1.3 (changed):
+		Added RectangleDielectric
+	* csdl/csdl_hlcsdl.itcl 1.3 (changed):
+		Added RectangleDielectric.
+	* bem/src/nmmtl.cpp 1.2 (changed):
+		Added completion message:  "MMTL is done"
+	* gui/gui_canvas.itcl 1.2 (changed):
+		Added drawing (visitor) code for "Dielectric Rectangle"
+	* gui/gui.tcl 1.4 (changed):
+		Added new "Dielectric Rectangle" frame and variables.
+	* bem/src/nmmtl_parse_xsctn.cpp 1.6 (changed):
+		Added rectangle dielectrics 
+		Enhanced error checking and messages.
+	* bem/src/nmmtl_dump_geometry.cpp 1.2 (changed):
+		Fixed loop through dielectrics so it doesn't change the 
+		list pointer.
+	* bem/lib/bem.tcl 1.3 (changed):
+		Improved error checking for MMTL run.
+	* bem/src/nmmtl_gen_netlist_from_icon.cpp 1.2 (changed):
+	* bem/src/nmmtl_parse_graphic.cpp 1.3 (changed):
+		Removed #include "list.h" (which is empty)
+	* gui/conductivity.list 1.2 (changed):
+	* gui/loss_tangent.list 1.2 (changed):
+	* gui/permittivity.list 1.2 (changed):
+		Sorted.
+
+2003-06-09 techenti
+	* csdl/csdl.tcl 1.5 (changed):
+		Changed csdlWriteTcl to always write all attributes 
+		(instead of skipping those with default values). - ticket 
+		gen128
+	* csdl/configure.ac 1.4 (changed):
+	* csdl/csdl.tcl 1.6 (changed):
+	* csdl/csdl_hlcsdl.itcl 1.2 (changed):
+	* csdl/csdl_llcsdl.itcl 1.2 (changed):
+	* csdl/csdl_shapes.itcl 1.2 (changed):
+	* csdl/pkgIndex.tcl 1.3 (changed):
+		Updated package version to 1.0.1
+
+2003-05-27 techenti
+	* bem/configure.ac 1.8 (changed):
+		Added -Uinline to CXXFLAGS for HP-UX 10.20
+	* csdl/configure.ac 1.3 (changed):
+	* gui/configure.ac 1.3 (changed):
+	* units/configure.ac 1.2 (changed):
+		Removed compiler checks, as this is a pure script library.
+
+2003-05-12 techenti
+	* csdl/bootstrap 1.2 (changed):
+	* gui/bootstrap 1.3 (changed):
+	* units/bootstrap 1.2 (changed):
+		Replaced with simpler script, which does not need 
+		makefiles and does not configure/make targets.
+
+2003-03-06 techenti
+	* bem/lib/pkgIndex.tcl 1.4 (changed):
+		Added quotes to path name to keep tcl_platoform(os) 
+		"Windows NT" as a single word.
+	* tnt.tcl 1.7 (changed):
+		Revised splash screen from MMTL to TNT, and added "help 
+		about"
+
+2003-03-04 techenti
+	* bem/lib/pkgIndex.tcl 1.3 (changed):
+		Added starkit support for env(BEM_LIBRARY), which puts 
+		executables in a nearby bin directory
+
+2003-02-26 techenti
+	* bem/configure.ac 1.7 (changed):
+		Added *linux* to list of platforms.  
+		Perhaps the default should be to include 
+		FORTRAN_UNDERBARS.
+
+2003-01-30 techenti
+	* csdl/csdl.tcl 1.4 (changed):
+		Added [catch] to csdlReadTCL to flag non-existant files.
+
+2002-11-21 zahn
+	* gui/gui_build.tcl 1.6 (changed):
+		*** empty log message ***
+
+2002-11-07 zahn
+	* calcCAP/Makefile.am 1.3 (changed):
+	* calcCAP/lib/pkgIndex.tcl 1.2 (changed):
+	* calcRL/Makefile.am 1.3 (changed):
+	* calcRL/configure.ac 1.2 (changed):
+	* calcRL/lib/calcRL.tcl 1.4 (changed):
+	* calcRL/lib/pkgIndex.tcl 1.2 (changed):
+	* calcRL/lib/xmgrPlotParamaters 1.1 (added):
+	* calcRL/lib/xmgrPlotParameters 1.1 (added):
+	* tnt.tcl 1.4 (changed):
+		*** empty log message ***
+	* calcRL/src/calcRL.cpp 1.2 (changed):
+		add xmgr output file and data file containing freq, 
+		inductance and resistance values
+	* calcRL/lib/calcRL_exe.tcl 1.3 (changed):
+		added the writing of xmgr files for resistance and 
+		inductance and writing 
+		a data file of the frequency, inductance, and resistance 
+		values.
+
+2002-11-06 zahn
+	* gui/gui_elements.tcl 1.5 (changed):
+		*** empty log message ***
+
+2002-11-05 zahn
+	* gui/gui_initialize.tcl 1.4 (changed):
+		*** empty log message ***
+
+2002-10-30 techenti
+	* bem/configure.ac 1.6 (changed):
+		Removed C compiler macros because configure (incorrectly) 
+		decides that 
+		native HP ANSI C does not support the inline keyword and 
+		(incorrectly)
+		passes "-Dinline=" to aCC, which causes math.h all kinds 
+		of trouble.
+		(And we don't have any C code here anyway.  It's all C++)
+
+2002-10-29 techenti
+	* bem/configure.ac 1.5 (changed):
+		Added some documentation to platform specific flags.  
+		Fixed up cygwin builds
+	* csdl/pkgIndex.tcl 1.2 (changed):
+		Quoted $dir argument, which might include spaces
+	* gui/pkgIndex.tcl 1.3 (changed):
+		Quoted $dir, which might include spaces.
+
+2002-10-28 techenti
+	* bem/src/nmmtl_parse_xsctn.cpp 1.5 (changed):
+		Corrected bug when malloc-ing new contour structs, set 
+		c->points = NULL.
+		Added explicit nulls on dielectric structs, too.
+
+2002-10-25 zahn
+	* csdl/csdl.tcl 1.3 (changed):
+	* gui/gui_build.tcl 1.5 (changed):
+		*** empty log message ***
+
+2002-10-25 techenti
+	* bem/src/nmmtl_output_headers.cpp 1.5 (changed):
+		Added #include <time.h> (again)
+	* bem/src/nmmtl_parse_graphic.cpp 1.2 (changed):
+		Added conditional definition for M_PI, which doesn't exist 
+		on Windows
+	* bem/configure.ac 1.4 (changed):
+		Added portability checks for pwd.h and getlogin().
+		Changed CFLAGS, CXXFLAGS, and FFLAGS to their AM_ 
+		counterparts.
+	* bem/src/nmmtl_output_headers.cpp 1.6 (changed):
+		Added portable getlogin() function for systems like 
+		Windows where no such POSIX facilities exist.
+
+2002-10-24 zahn
+	* gui/bootstrap 1.2 (changed):
+	* gui/gui.tcl 1.3 (changed):
+	* gui/gui_build.tcl 1.4 (changed):
+	* gui/gui_initialize.tcl 1.3 (changed):
+	* csdl/csdl.tcl 1.2 (changed):
+		added catch to the source of the filename
+
+2002-10-23 zahn
+	* bem/src/nmmtl_output_headers.cpp 1.4 (changed):
+	* bem/src/nmmtl_parse_xsctn.cpp 1.4 (changed):
+		*** empty log message ***
+
+2002-10-22 zahn
+	* bem/Makefile.am 1.4 (changed):
+	* bem/configure.ac 1.3 (changed):
+	* bem/src/magicad.h 1.3 (changed):
+	* bem/src/nmmtl_output_headers.cpp 1.3 (changed):
+	* bem/src/nmmtl_parse_xsctn.cpp 1.3 (changed):
+		*** empty log message ***
+
+2002-10-22 techenti
+	* bem/src/nmmtl_output_headers.cpp 1.2 (changed):
+		Added #include <time.h>
+	* bem/src/magicad.h 1.2 (changed):
+		Removed most of the old MagiCAD definitions.
+		Replaced an enumerated boolean with typedef int
+
+2002-10-17 zahn
+	* bem/Makefile.am 1.3 (changed):
+	* bem/configure.ac 1.2 (changed):
+	* Makefile.am 1.2 (changed):
+	* bootstrap 1.3 (changed):
+	* calcCAP/bootstrap 1.1 (added):
+	* calcCAP/configure.ac 1.2 (changed):
+	* configure.ac 1.2 (changed):
+	* csdl/Makefile.am 1.3 (changed):
+	* csdl/bootstrap 1.1 (added):
+	* csdl/configure.ac 1.2 (changed):
+	* gui/Makefile.am 1.3 (changed):
+	* gui/bootstrap 1.1 (added):
+	* gui/configure.ac 1.2 (changed):
+		*** empty log message ***
+
+2002-10-14 zahn
+	* gui/gui.tcl 1.2 (changed):
+	* gui/gui_build.tcl 1.3 (changed):
+	* gui/gui_elements.tcl 1.4 (changed):
+	* gui/gui_xmission.tcl 1.2 (changed):
+	* gui/Makefile.am 1.2 (changed):
+	* gui/pkgIndex.tcl 1.2 (changed):
+		added gui_xmission.tcl
+
+2002-10-11 zahn
+	* Makefile.am 1.1 (added):
+	* calcCAP/lib/calcCAP.tcl 1.3 (changed):
+	* calcRL/lib/calcRL.tcl 1.3 (changed):
+	* configure.ac 1.1 (added):
+	* gui/gui_build.tcl 1.2 (changed):
+	* tnt.tcl 1.3 (changed):
+		*** empty log message ***
+
+

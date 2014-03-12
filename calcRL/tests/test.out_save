@@ -1,0 +1,21 @@
+--------------------------------------------------------
+Resistance/Inductance Values
+Input file: test.in
+--------------------------------------------------------
+Frequency: 1e+09     Conductivity: 5e+07
+
+2X2 Resistance Matrix (Ohm/m):
+
+5461.21     152.784     
+
+152.784     5461.42     
+
+2X2 Inductance Matrix (H/m):
+
+5.56436e-07     1.25801e-07     
+
+1.25801e-07     5.56401e-07     
+
+
+User CPU time: 13
+ Sys CPU time: 0

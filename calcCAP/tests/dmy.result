@@ -1,0 +1,81 @@
+
+2002 10 10 10:46:23 zahn NMMTL_2DLF
+
+File = /sppdg/software/src/tnt/calcCAP/tests/dmy
+Number of Signal Lines  =   2
+Number of Ground Planes =   1
+Number of Ground Wires  =   0
+Coupling Length =   0.02540 meters
+Rise Time =  1000.0000 picoseconds
+Contour (conductor) segments [cseg] = 10
+Ground Plane/Dielectric segments [dseg] = 10
+Conductivity Rect2R1 = 3 siemens/meter
+Conductivity Rect2R0 = 3 siemens/meter
+Note: minimum frequency for surface current assumptions is 9 MHz.
+Mutual and Self Electrostatic Induction:
+B(Active Signal , Passive Signal) Farads/Meter
+B( ::Rect2R1 , ::Rect2R1 )=   1.2112143e-10
+B( ::Rect2R1 , ::Rect2R0 )=  -6.6519686e-11
+B( ::Rect2R0 , ::Rect2R1 )=  -6.6535805e-11
+B( ::Rect2R0 , ::Rect2R0 )=   1.2112186e-10
+
+Mutual and Self Inductance:
+L(Active Signal , Passive Signal) Henrys/Meter
+L( ::Rect2R1 , ::Rect2R1 )=   5.2066576e-07
+L( ::Rect2R1 , ::Rect2R0 )=   2.7070251e-07
+L( ::Rect2R0 , ::Rect2R1 )=   2.7074952e-07
+L( ::Rect2R0 , ::Rect2R0 )=   5.2066366e-07
+
+Asymmetry Ratios:
+
+  Asymmetry ratio for inductance matrix:
+     0.017366% (max), 0.017366% (average)
+
+  Asymmetry ratio for electrostatic induction matrix:
+     0.024232% (max), 0.024232% (average).
+
+
+Characteristic Impedance (Ohms):
+For Signal Line ::Rect2R1= 65.5645
+For Signal Line ::Rect2R0= 65.5643
+
+Characteristic Impedance Odd/Even (Ohms):
+  odd= 36.4984
+ even= 120.389
+
+Effective Dielectric Constant:
+For Signal Line ::Rect2R1= 4.14124
+For Signal Line ::Rect2R0= 4.14124
+
+Propagation Velocity (meters/second):
+For Signal Line ::Rect2R1=   1.4731787e+08
+For Signal Line ::Rect2R0=   1.4731790e+08
+
+Propagation Velocity Odd/Even (meters/second):
+  odd= 1.46015e+08
+ even= 1.52127e+08
+
+Propagation Delay (seconds/meter):
+For Signal Line ::Rect2R1=   6.7880427e-09
+For Signal Line ::Rect2R0=   6.7880412e-09
+
+Propagation Delay Odd/Even (seconds/meter):
+  odd= 6.8486e-09
+ even= 6.57344e-09
+
+Rdc:
+Rdc(Active Signal , Passive Signal) Ohms/Meter
+Rdc( ::Rect2R1 , ::Rect2R1 )=   1.5873017e-02
+Rdc( ::Rect2R1 , ::Rect2R0 )=   0.0000000e+00
+Rdc( ::Rect2R0 , ::Rect2R1 )=   0.0000000e+00
+Rdc( ::Rect2R0 , ::Rect2R0 )=   1.5873017e-02
+
+Far-End (Forward) Cross Talk:
+FXT(Active Signal, Passive Signal)
+FXT( ::Rect2R1 , ::Rect2R0 )= 2.95733e-03 =   -50.58200 dB
+
+Near-End (Backward) Cross Talk:
+BXT(Active Signal, Passive Signal)
+BXT( ::Rect2R1 , ::Rect2R0 )= 9.21856e-02 =   -20.70674 dB
+
+NOTE: Cross talk results assume there are no reflections.

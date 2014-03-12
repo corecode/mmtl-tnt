@@ -1,0 +1,234 @@
+#---------------------------------------------------------------------
+#
+#
+# MeasText.itcl
+#
+#  Class for lab applications using SPPDG *measure.txt files.
+#  This class opens measure.txt files, parses headers and tests,
+#  and holds onto notes, vendor, serial number.
+#
+#  Eric Amundsen
+#  May 28, 2004
+#
+#  Copyright 2004 Mayo Foundation.  All rights reserved.
+#
+#
+# $Id: MeasText.itcl,v 1.4 2004/06/04 16:18:08 amundsen Exp $ --------------------------------------------------------------
+package provide MeasText 1.0
+
+package require Itcl
+
+#  +-Class Name-------------------------------------------------------+
+#  |
+#  | itcl::class MeasText
+#  |
+#  +-Attributes-------------------------------------------------------+
+#  |
+#  | Protected:
+#  |  tests
+#  |  currentTest
+#  |  measFilename
+#  |  header
+#  |  measFile
+#  |  vendor
+#  |  serialNumber
+#  |  displayedNotes
+#  |  nonDisplayedNotes
+#  |
+#  +-Methods----------------------------------------------------------+
+#  |
+#  | Public:
+#  |  constructor
+#  |  destructor
+#  |  parseMeasFilename
+#  |  
+#  |  getTestNumbers
+#  |  setHeader
+#  |  getHeader
+#  |  setMeasFilename
+#  |  getMeasFilename
+#  |  setSerialNumber
+#  |  getSerialNumber
+#  |  setVendor
+#  |  getVendor
+#  |  setCurrentTest
+#  |  getCurrentTest
+#  |  setDisplayedNotes
+#  |  getDisplayedNotes
+#  |  setNonDisplayedNotes
+#  |  getNonDisplayedNotes
+#  |
+#  | Private:
+#  |  parseHeader
+#  |  parseTests
+#  |
+#  +------------------------------------------------------------------+
+itcl::class MeasText {
+
+	public {
+		method constructor {args}			{ array set tests [list] }
+
+		method parseMeasFilename			{}
+
+		method setHeader {value}			{ set header $value }
+		method getHeader {}					{ return $header }
+
+		method setMeasFilename {value}		{ set measFilename $value }
+		method getMeasFilename {}			{ return $measFilename } 
+
+		method setSerialNumber {value}		{ set serialNumber $value } 
+		method getSerialNumber {}			{ return $serialNumber } 
+
+		method setVendor {value}			{ set vendor $value } 
+		method getVendor {}					{ return $vendor } 
+
+		method setDisplayedNotes {value}	{ set displayedNotes $value }
+		method getDisplayedNotes {}			{ return $displayedNotes }
+
+		method setNonDisplayedNotes {value} { set nonDisplayedNotes $value } 
+		method getNonDisplayedNotes {}		{ return $nonDisplayedNotes }
+
+		method setCurrentTest {value}		{ set currentTest $value } 
+		method getFooter {}					{return [lindex [getCurrentTest] 1]}
+		method getCurrentTest {} {
+			set returnValue [list $currentTest]
+			lappend returnValue [lindex [array get tests $currentTest] 1]
+			return $returnValue
+		}
+		method getTestNumbers {} {
+			# return a list of the tests indices
+			return [array names tests]
+		}
+
+	}
+
+	protected {
+		# an array indexed by test numbers, each element containing a list
+		# of strings corresponding to the test text
+		variable tests
+
+		# an index to get the current selected test out of the tests array
+		variable currentTest ""
+
+		# the fully qualified filename of the current measure.txt file
+		variable measFilename ""
+
+		# a list of header lines - parsed by parseHeader
+		variable header [list]
+
+		# a list of lines from the measure.txt file
+		variable measFile [list]
+
+		variable vendor ""
+		variable serialNumber ""
+
+		# these should be handled as lists of strings, although this class
+		# doesn't do anything to enforce that, but the derived GUI class
+		# transacts with these variables in that fashion, so it's probably
+		# a good idea to stick with that
+		variable displayedNotes [list]
+		variable nonDisplayedNotes [list]
+	}
+
+	private {
+		method parseHeader {}
+		method parseTests {}
+	}
+}
+
+
+#  +-Public Method----------------------------------------------------+
+#  |
+#  | MeasText::parseMeasFilename
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Make sure the filename exists, open it, read it,
+#  | split it into list, parse the header and the tests
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasText::parseMeasFilename {} {
+	if {![catch {open $measFilename r} {handle}]} {
+
+		# read the entire measure.txt file
+		set measFile [split [read $handle] "\n"]
+		close $handle
+
+		# get the header out of the measFile variable
+		parseHeader
+
+		# get the tests out too
+		parseTests
+	}
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasText::parseHeader
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Finds the lines following the "Header:" line
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasText::parseHeader {} {
+	set headerStart [lsearch $measFile "Header:"]
+
+	# If found
+	if {$headerStart >= 0} {
+
+		# Find the next empty line
+		set headerEnd [lsearch -start $headerStart $measFile ""]
+
+		# Stick the lines between the "Header:" line and the empty
+		# line into the header attribute
+		set header [lrange	$measFile	\
+							[expr {$headerStart + 1}]	\
+							[expr {$headerEnd - 1}]]
+	} else {
+
+		# If not found make sure the header attribute is empty
+		set header [list]
+	}
+}
+
+#  +-Private Method---------------------------------------------------+
+#  |
+#  | MeasText::parseTests
+#  |
+#  +-Description------------------------------------------------------+
+#  |
+#  | Find all the "Test*" lines and stick the following lines
+#  | (up to the next empty line), as a list of strings, into
+#  | an array indexed by the "Test*" line
+#  |
+#  +-Arguments--------------------------------------------------------+
+#  |
+#  +-Return value-----------------------------------------------------+
+#  |
+#  +------------------------------------------------------------------+
+itcl::body MeasText::parseTests {} {
+
+	# clear the tests array
+	array unset tests
+
+	# search for all strings starting with Test
+	foreach testStart [lsearch -all -glob $measFile "Test*"] {
+
+		# then find the next empty line
+		set testEnd [lsearch -start $testStart $measFile ""]
+
+		# then stick these lines into the array with the Test*
+		# string as the index
+		set tests([lindex $measFile $testStart])	\
+			[lrange	$measFile [expr {$testStart + 1}] [expr {$testEnd - 1}]]
+	}
+}

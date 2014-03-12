@@ -1,0 +1,39 @@
+#----------------------------------
+# File:  /users/zahn/lib/bem/tests/generic.xsctn
+# Fri Sep 27 07:56:54 DST 2002
+#----------------------------------
+
+package require csdl
+
+set _title "Duplicate of generic.xsctn"
+set ::Stackup::couplingLength "10000"
+set ::Stackup::riseTime "20"
+set ::Stackup::frequency "1000MHz"
+set ::Stackup::defaultLengthUnits "microns"
+set CSEG 90
+set DSEG 90
+
+GroundPlane G15 
+DielectricLayer D13  \
+	 -thickness 10.57 \
+	 -lossTangent 0.001 \
+	 -permittivity 4.1
+RectangleConductors grWires  \
+	 -width 40 \
+	 -pitch 70 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 4 \
+	 -number 2 \
+	 -yOffset 0 \
+	 -xOffset 0
+RectangleConductors Rect15  \
+	 -width 10 \
+	 -pitch 70 \
+	 -conductivity 3e+07siemens/meter \
+	 -height 4 \
+	 -yOffset 0 \
+	 -xOffset 50
+DielectricLayer D15  \
+	 -thickness 8.3 \
+	 -lossTangent 0.001 \
+	 -permittivity 4

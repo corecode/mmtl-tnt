@@ -1,0 +1,121 @@
+sppdgTcllib/console/README
+
+	console package
+
+
+This tcl library provides the 'console' package for use within 
+applications.
+
+It is often nice to be able to open a console window in your
+application to give users access to a log window and/or to give
+programmers the ability to debug applications on the fly.  You can
+either look at the results of commands (puts output is captured) or
+type commands directly into the interpreter.
+
+Long, long ago, Jeff Hobbs published a Console widget, based on his
+tkcon work and the 'widget' package.  But this has not been updated
+and doesn't work too well.  Note that 'package require Console' (with
+a capital C) gets you the Hobbs widget.  Use lowercase for this
+package.
+
+This alternative package wraps around the (more updated and complete)
+tkcon application.  This is an excellent console application in its
+own rithe, and can be invoked as a componet of another application, if
+you know all the secret internal bits to set.
+
+
+SYNOPSIS
+--------
+
+   package require console 
+   console::create ?options?
+   console::show
+   console::hide
+
+
+COMMANDS:
+---------
+
+  console::create ?options?
+
+Create the console window.  This must be a toplevel window, and cannot
+be a widget to be packed into another interface.  Each option requires
+a value.
+
+  console::show
+
+Shows (deiconifies) the console window.  Sets the -variable to "1".
+
+  console::hide
+
+Hides (withdraws) the console window.  Sets the -variable to "0"
+
+
+OPTIONS
+-------
+
+Options control the behavior of the console.  You can't change 'em
+once created.
+
+  -showOnStartup <value>
+
+If value is "1", the console is shown when created.  If the value is
+"0", then the console is created in a withdrawn state.  The default is
+0.
+
+  -root <windowName>
+
+Root window name for the console.  This must be a toplevel, and it
+must not yet exist.  Default is .console.
+
+  -protocol <script>
+
+The script code is assigned to the console window's WM_DELETE_WINDOW
+protocol (see [wm protocol]).  This script is executed when the user
+clicks on the [X] button on the console window.  The default script is
+{console::hide}, which just hides the console window.
+
+  -showMenu <value>
+
+If value is "1", then the console comes with tkCon's menu bar.  If
+value is "0", then the window appears without any menu bar.  The
+default is 0.
+
+  -title <string>
+
+Sets the window title text on the console window's title bar.  The
+default is "Command Console".
+
+  -variable <varname>
+
+Associates the show/hiddent state of the console window with the
+specified variable.  The default is no variable.  But if a variable is
+specified, then it will be set to 0 or 1 whenever the console is
+hidden or shown, respectively.  A trace is set on the variable, so
+that if it changes to 0 or 1, the console is hidden or shown.  This is
+handy if you put a checkbutton on your gui, and assign a variable.
+
+
+
+
+EXAMPLES
+--------
+
+See the file console_demo.tcl for a small application based on the
+BWidget toolkit which illustrates menu control of the console.
+
+
+
+  package require Tk
+  package require console
+
+  menu .menu
+  . configure -menu .menu
+  menu .menu.view
+  .menu add cascade -label "View" -menu .menu.view
+  .menu.view add checkbutton -label "Console" -variable ::showConsole
+
+  console::create -title "My App Console" -variable ::showConsole
+
+
+	

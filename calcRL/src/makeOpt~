@@ -1,0 +1,22 @@
+aCC -O +Onolimit \
+        -I/sppdg/software/src/sim/calcRI \
+	adfunc.cc \
+	complex.cc \
+	kelvin.cc \
+	bicgstab.cc \
+	data.cc \
+	sparse.cc \
+	cmplxmat.cc \
+	gauleg.cc \
+	matrix.cc \
+	stdafx.cc \
+	cmplxvec.cc \
+	hankel.cc \
+	myfunc.cc \
+	systsolv.cc \
+	coif4.cc \
+	ivectorl.cc \
+	vector.cc \
+	main.cc \
+	-lm -o calcRI.exe 
+

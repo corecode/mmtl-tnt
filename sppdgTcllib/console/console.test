@@ -1,0 +1,195 @@
+# console tests.                                              -*- tcl -*-
+#
+# Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright 2004 Mayo Foundation.  All rights reserved.
+# $Id: console.test,v 1.1 2004/02/12 20:56:57 techenti Exp $
+
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import ::tcltest::*
+}
+
+#-------------------------------------------------------------------------
+#  Tell tcltest to log error messages.
+#  Since we're using child interps, you don't get much
+#  in the way of meaningful test failures - just a return code
+#  mismatch.
+#-------------------------------------------------------------------------
+::tcltest::configure -verbose be
+
+#-------------------------------------------------------------------------
+# Set the auto_path for the child interps.
+#-------------------------------------------------------------------------
+set auto_path [concat [file dirname [info script]] $auto_path]
+
+#-------------------------------------------------------------------------
+#  Create child interps using this autopath.
+#  Add code to load console package, and remove a special
+#  tkcon variable which would cause problems with
+#  tkcon's checkpointing when run in child interps.
+#-------------------------------------------------------------------------
+proc createInterp {} {
+    set c [interp create]
+    $c alias parentSet set
+    $c eval {
+	set argv ""
+	set auto_path [parentSet ::auto_path]
+	package require console
+	unset ::tkcon::CPS(slave,,cmd)
+    }
+    return $c
+}
+
+
+
+
+#-------------------------------------------------------------------------
+#  Begin tests
+#-------------------------------------------------------------------------
+
+test console-1.0 {create console, no options} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create
+	update
+	#::tkcon close
+    }]
+    interp delete $c
+    set result
+} {}
+
+
+test console-1.1 {create console, specify window name} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole
+	update
+	set result [winfo exists .myconsole]
+    }]
+    interp delete $c
+    set result
+} {1}
+
+test console-1.2 {create console, show on startup} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole -showOnStartup 1
+	update
+	set result [winfo ismapped .myconsole]
+    }]
+    interp delete $c
+    set result
+} {1}
+
+test console-1.3 {create console, don't show on startup} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole -showOnStartup 0
+	update
+	set result [winfo ismapped .myconsole]
+    }]
+    interp delete $c
+    set result
+} {0}
+
+test console-1.4 {create console, set title} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole -title "console title"
+	update
+	set result [wm title .myconsole]
+    }]
+    interp delete $c
+    set result
+} {console title}
+
+test console-1.5 {create console, set protocol script} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole -protocol "protocol script"
+	update
+	set result [wm protocol .myconsole WM_DELETE_WINDOW]
+    }]
+    interp delete $c
+    set result
+} {protocol script}
+
+test console-1.6 {create console, hide menu} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole -showMenu 0
+	update
+	set result $::tkcon::OPT(showmenu)
+    }]
+    interp delete $c
+    set result
+} {0}
+
+test console-1.7 {create console, show menu} {
+    set c [createInterp]
+    set result [$c eval {
+	console::create -root .myconsole -showMenu 1
+	update
+	set result $::tkcon::OPT(showmenu)
+    }]
+    interp delete $c
+    set result
+} {1}
+
+#-------------------------------------------------------------------------
+#  Test using global variable
+#  Note:  these tests all fail for some reason.  It acts like the
+#  package never creates the global variable.  Don't know if this
+#  is just an artifact of the child interp or the test harness.
+#  *sigh*
+#-------------------------------------------------------------------------
+
+if 0 {
+    test console-2.0 {create console with global variable} {
+	set c [createInterp]
+	set result [$c eval {
+	    console::create -root .myconsole -variable ::myglobal
+	    update
+	    set result [info exists ::myglobal]
+	}]
+	interp delete $c
+	set result
+    } {1}
+
+
+    test console-2.1 {create console with global variable, show and hide} {
+	set c [createInterp]
+	set result [$c eval {
+	    console::create -root .myconsole -variable ::myglobal
+	    set ::myglobal 1
+	    update
+	    set result [list [winfo ismapped .myconsole]]
+	    set ::myglobal 0
+	    update
+	    lappend result [winfo ismapped .myconsole]
+	}]
+	interp delete $c
+	set result
+    } {1 0}
+
+    test console-2.2 {create console with global variable, show and hide} {
+	set c [createInterp]
+	set result [$c eval {
+	    console::create -root .myconsole -variable ::myglobal
+	    console::show
+	    update
+	    set result [list $::myglobal]
+	    console::hide
+	    lappend result $::myglobal
+	}]
+	interp delete $c
+	set result
+    } {1 0}
+
+}
+
+
+::tcltest::cleanupTests

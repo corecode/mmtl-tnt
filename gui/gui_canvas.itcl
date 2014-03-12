@@ -1,0 +1,654 @@
+# --------------------------------------------------------------------
+#
+#  canvas.itcl
+#
+#  The classes in this file draw a CSDL cross section on
+#  a canvas.  They act as visitors to the CSDL structure.
+#  All canvas drawing code is contained here, while the
+#  CSDL structures themselves support the navigation through
+#  the structure.
+#
+#  Example:
+#
+#    # assume that a valid CSDL cross section has already been
+#    # created.  Create a canvas visitor objects to draw the
+#    # stackup.
+#    grid [canvas .c]
+#    canvasDraw cd
+#    Stackup::accept cd .c
+#
+#
+#  Bob Techentin
+#  February 2, 2001
+#
+#  Copyright 2001-2004 Mayo Foundation.  All Rights Reserved
+#  $Id: gui_canvas.itcl,v 1.8 2004/07/20 14:51:55 techenti Exp $
+#
+# --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
+#
+#  Notes to the developer
+#
+#  Why is it that layers have both a name and a description?
+#  Which should be displayed in the annotation?  Who sets them?
+#
+#  Isn't there a lot of common code between this visitor and others?
+#  For example, shouldn't we compute the x0,x1,y0,y1 coordinates
+#  for a trapezoid just once?  Shouldn't there be a common
+#  visitor, which supports computing the appropriate x/y values?
+#  Or will that work, given that GPGE visitors must know about
+#  both the drawing x,y coordinates and the actual x,y coordinates?
+#
+# --------------------------------------------------------------------
+
+package require Itcl
+
+package provide gui 2.0
+
+# --------------------------------------------------------------------
+#
+#  itcl::class canvasDraw
+#
+#  This class is a visitor to the CSDL structures.  It draws
+#  the cross section structure on a Tk canvas.
+#
+# --------------------------------------------------------------------
+
+itcl::class canvasDraw {
+    # Perhaps someday soon ...
+    #inherit CSDLvisitor
+    public variable annotate 1
+
+    #  Parameters describing a layer stackup.
+    variable xOffsetLayer 0.0
+    variable totalWidth 0.0
+    variable totalHeight 0.0
+    variable minThickness 0.0
+    variable xoff 0.0
+    variable yoff 0.0
+    #  Drawing controls
+
+    #  For groups of conductors, we only want to annotate the
+    #  first one in the group, so set a couple of flags for
+    #  the low level shape drawing callbacks.
+    variable hlcsdlGroup 0
+    variable firstInGroup 0
+
+    #  These variables represent the canvasDraw's State,
+    #  which is set in higher level structures, and used in
+    #  lower level structures.  The high level structure can
+    #  set the name, color, and tags, which get used when the
+    #  lower level routines actually draw the polygons.
+    variable canvas
+    variable color
+    variable structName
+    variable description
+    variable tags
+    variable tagToSelect ""
+
+    #  HLCSDL - Stackup Structures
+    method visitStackup { stackup canvas }
+    method visitGroundPlane { groundPlane x y }
+    method visitDielectricLayer { dielectricLayer x y }
+    method visitRectangleDielectric { rectangleDielectric x y }
+    method visitRectangleConductors { rectangleConductors x y }
+    method visitTrapezoidConductors { trapezoidConductors x y }
+    method visitCircleConductors { circleConductors x y }
+
+    #  LLCSDL - low level structures
+    method visitDielectric { dielectric x y }
+    method visitConductor { conductivity x y }
+    method visitGround { ground x y }
+    method visitRectangle { rectangle x y }
+    method visitTrapezoid { trapezoid x y }
+    method visitCircle { circle x y }
+    method visitLayer { layer x y }
+
+    method getWidth {} { return [expr { $totalWidth * 0.5 }]  }
+    method getHeight {} { return $totalHeight }
+    # annotate the pitch and offsets for a set of conductors
+    method annotatePitchOffsets { x y width height pitch atags }
+    # get the current color
+    method getFillColor {}
+    # set the tag of the object that needs to be drawn selected
+    method setTagToSelect { tagPrefix } {
+	set tagToSelect $tagPrefix
+    }
+}
+
+
+
+# --------------------------------------------------------------------
+# --------------------------------------------------------------------
+# --------------------------------------------------------------------
+#
+#  HLCSDL - Stackup Structures
+#
+# --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
+#
+#  canvasDraw::visitStackup
+#
+#  The canvasDraw visits the layer stackup before any of the
+#  high level or low level structures.  This routine will
+#  compute scale factors for canvasDraw drawing based on
+#  total cross section height and width.
+#
+# --------------------------------------------------------------------
+
+itcl::body canvasDraw::visitStackup { stackup widget } {
+
+    set canvas $widget
+    set structureList $Stackup::structureList
+
+    #  Drawn cross section should be twice as wide as
+    #  the widest stackup structure.  Note that this is
+    #  distinct from the rules defined for the EM simulators,
+    #  such as the 3x factor for MMTL models, which are 
+    #  required for reliable simulation.  This just looks pretty.
+    set totalWidth 0.0
+    set condWidth 0.0
+
+    #  Find thinnest structure in the stackup, so if there
+    #  are any zero-thickness structures, we can draw them
+    #  with some minimum thickness.
+    set minHeight 1.0e10
+    foreach struct $structureList {
+	if { ([$struct height] > 0.0) && \
+		([$struct height] < $minHeight) } {
+	    set minHeight [$struct height]
+	}
+
+	if { [$struct width] > $totalWidth } {
+	    set totalWidth [$struct width]
+	}
+	if {! [$struct isa GroundPlane] && ! [$struct isa DielectricLayer]} {
+	    if { [$struct width] > $condWidth } {
+		set condWidth [$struct width]
+	    }
+	}
+    }
+    if { $minHeight == 1.0e10 } {
+	set minHeight 10
+    }
+    set minThickness [expr {$minHeight * 0.75}]
+
+    set y0 0
+    foreach struct $structureList {
+	if {[$struct isa GroundPlane] || [$struct isa DielectricLayer]} {
+	    if { [$struct height] > 0.0 } {
+		set y0 [expr {$y0 + [$struct height]}]
+	    } else {
+		set y0 [expr {$y0 + $minThickness}]
+	    }
+	} 
+    }
+    if { $y0 > $totalWidth } {
+	set totalWidth $y0
+    }
+
+##    set xOffsetLayer [expr {$totalWidth / 2.0}]
+    set totalWidth [expr { $totalWidth * 2 }]
+    set xOffsetLayer [expr { ($totalWidth - $condWidth) * 0.5}]
+    set totalHeight $y0
+
+    #  Draw all the cross section elements.  Increment "y0" 
+    #  for ground and dielectric layers.
+    set y0 0
+    foreach struct $structureList {
+	$struct accept $this 0 $y0
+	if {[$struct isa GroundPlane] || [$struct isa DielectricLayer]} {
+	    if { [$struct height] > 0.0 } {
+		set y0 [expr {$y0 + [$struct height]}]
+	    } else {
+		set y0 [expr {$y0 + $minThickness}]
+	    }
+	}
+    }
+
+    # Mark the origin of the drawing.
+    set xyP [expr { $minHeight * 0.25 } ]
+    set xyN [expr { $xyP * -1 } ]
+    $canvas create line $xyN $xyN $xyP $xyP \
+	    -tag annotation
+    $canvas create line $xyN $xyP $xyP $xyN \
+	    -tag annotation
+    #  Arrange the canvas items so that layers are on the bottom,
+    #  then rectangles (which might be dielectric rectangles),
+    #  then conductors, then annotations.  Note that we've set
+    #  tags on the various drawn items just for this purpose.
+    $canvas lower layer
+    $canvas raise rectangle
+    $canvas raise conductor
+    $canvas raise annotation
+}
+
+# --------------------------------------------------------------------
+#  Structures
+# 
+#  We don't actually draw most of the high level
+#  structures.  We defer drawing to the structure shapes
+#  (Rectangles, Layers, etc.).  The shapes have to get
+#  drawn anyway, so we're not going to duplicate code here.
+# --------------------------------------------------------------------
+itcl::body canvasDraw::visitGroundPlane { groundPlane x y } {
+    set structName [namespace tail $groundPlane]
+    set tags $structName
+}
+itcl::body canvasDraw::visitDielectricLayer { dielectricLayer x y } {
+    set structName [namespace tail $dielectricLayer]
+    set tags $structName
+}
+
+# --------------------------------------------------------------------
+#  There are special annotations for groups of dielectric blocks.
+#  First, we have to set a couple of flags so that only the first
+#  dielectric in the group gets dimension annotations.  Then we
+#  have to add an annotation for the pitch.
+# --------------------------------------------------------------------
+itcl::body canvasDraw::visitRectangleDielectric { rectangleDielectric x y } {
+
+    set structName [namespace tail $rectangleDielectric]
+    set tags $structName
+
+    #  Set the group and first flags so that low level routines
+    #  know can handle the first drawn conductor differently.
+
+    set xoff [$rectangleDielectric cget -xOffset]
+    set yoff [$rectangleDielectric cget -yOffset]
+    set hlcsdlGroup 1
+    set firstInGroup 1
+    set number [$rectangleDielectric cget -number]
+    if { $annotate && $number > 1 } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	# Get parameters from the dielectric
+	set width [$rectangleDielectric cget -width]
+	set height [$rectangleDielectric height]
+	set pitch  [$rectangleDielectric cget -pitch]
+	if { $number < 2 } {
+	    return
+	}
+	# Figure out coordinates and draw annotation
+	annotatePitchOffsets [expr { $x + $xoff }] [expr { $y + $yoff }] \
+		$width $height $pitch $atags
+    }
+}
+
+# --------------------------------------------------------------------
+#  There are also special annotations for groups of conductors.
+# --------------------------------------------------------------------
+itcl::body canvasDraw::visitRectangleConductors { rectangleConductors x y } {
+
+    set structName [namespace tail $rectangleConductors]
+    set tags $structName
+
+    #  Set the group and first flags so that low level routines
+    #  know can handle the first drawn conductor differently.
+
+    set xoff [$rectangleConductors cget -xOffset]
+    set yoff [$rectangleConductors cget -yOffset]
+    set hlcsdlGroup 1
+    set firstInGroup 1
+    set number [$rectangleConductors cget -number]
+    if { $annotate && $number > 1 } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	# Get parameters from the conductors
+	set width [$rectangleConductors cget -width]
+	set height [$rectangleConductors height]
+	set pitch  [$rectangleConductors cget -pitch]
+	if { $number < 2 } {
+	    return
+	}
+	# Figure out coordinates and draw annotation
+	annotatePitchOffsets [expr { $x + $xoff }] [expr { $y + $yoff }] \
+		$width $height $pitch $atags
+    }
+}
+itcl::body canvasDraw::visitTrapezoidConductors { trapezoidConductors x y } {
+
+    set structName [namespace tail $trapezoidConductors]
+    set tags $structName
+
+    #  Set the group and first flags so that low level routines
+    #  know can handle the first drawn conductor differently.
+    set xoff [$trapezoidConductors cget -xOffset]
+    set yoff [$trapezoidConductors cget -yOffset]
+
+    set hlcsdlGroup 1
+    set firstInGroup 1
+    set number [$trapezoidConductors cget -number]
+    if { $annotate && $number > 1 } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	# Get parameters from the conductors
+	set height [$trapezoidConductors height]
+	set pitch  [$trapezoidConductors cget -pitch]
+	set number [$trapezoidConductors cget -number]
+	set twidth [$trapezoidConductors cget -topWidth]
+	set twidth [$trapezoidConductors cget -topWidth]
+	set bwidth [$trapezoidConductors cget -bottomWidth]
+	set width [expr { ($twidth + $bwidth) * 0.5 }]
+	# Figure out coordinates and draw annotation
+	annotatePitchOffsets [expr { $x + $xoff }] [expr { $y + $yoff }] \
+		$width $height $pitch $atags
+    }
+}
+itcl::body canvasDraw::visitCircleConductors { circleConductors x y } {
+
+    set structName [namespace tail $circleConductors]
+    set tags $structName
+
+    #  Set the group and first flags so that low level routines
+    #  know can handle the first drawn conductor differently.
+    set xoff [$circleConductors cget -xOffset]
+    set yoff [$circleConductors cget -yOffset]
+
+    set hlcsdlGroup 1
+    set firstInGroup 1
+    set number [$circleConductors cget -number]
+    if { $annotate && $number > 1 } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	# Get parameters from the conductors
+	set height [$circleConductors height]
+	set pitch  [$circleConductors cget -pitch]
+	set width [$circleConductors cget -diameter]
+	# Figure out coordinates and draw annotation
+	annotatePitchOffsets [expr { $x + $xoff }] [expr { $y + $yoff }] \
+		$width $height $pitch $atags
+    }
+}
+
+# --------------------------------------------------------------------
+#  LLCSDL - low level structures
+#
+#  We don't draw the structures either.  The actual drawing
+#  is done by the shapes.  But we *do* capture important
+#  information from the structures which gets used during
+#  the shape drawing code.
+#
+#  Set the color, append tags for structuture type
+#  (e.g., "conductor") and structure name.  Create
+#  a description with some properties from the structure.
+# --------------------------------------------------------------------
+
+itcl::body canvasDraw::visitDielectric { dielectric x y } {
+    set color #90ee90 ;# "lightgreen"
+    lappend tags dielectric $dielectric
+    set perm [$dielectric cget -permittivity]
+    set ltan [$dielectric cget -lossTangent]
+    set description "$structName: econst=$perm, lossTan=$ltan"
+}
+
+itcl::body canvasDraw::visitConductor { conductor x y } {
+    set color #ffff00 ;# "yellow"
+    lappend tags conductor $conductor
+    set cond [$conductor cget -conductivity]
+    set description "$structName cond=$cond"
+}
+
+itcl::body canvasDraw::visitGround { ground x y} {
+    set color #add8e6 ;# "lightblue"
+    lappend tags ground $ground
+    set description "$structName"
+}
+
+
+
+# --------------------------------------------------------------------
+#
+#  getFillColor
+#
+#  If one of the current set of tags matches $tagToSelect,
+#  then we have to return the select color.  Otherwise,
+#  we use the current fill color.
+#
+# --------------------------------------------------------------------
+itcl::body canvasDraw::getFillColor {} {
+
+    if { [lsearch $tags $tagToSelect] < 0 } {
+	return $color
+    } else {
+	return #ff0000 ;# "red"
+    }
+}
+
+
+# --------------------------------------------------------------------
+#
+#  annotatePitchOffsets
+#
+#  Draw arrows and dimension text for offsets and pitch
+#  between multiple objects.
+#
+# --------------------------------------------------------------------
+itcl::body canvasDraw::annotatePitchOffsets { x y width height pitch atags } {
+
+    set x0 [expr {[length $x] + $width/2.0}]
+    set x1 [expr {$x0 + [length $pitch]}]
+    set ycenter [expr {[length $y] + [length $height]/2.0}]
+    set xcenter [expr {0.5 * ($x0+$x1)}]
+    $canvas create line $x0 $ycenter $x1 $ycenter \
+	    -arrow both -tag $atags
+    $canvas create text $xcenter $ycenter \
+	    -anchor s -text $pitch -tag $atags
+    if { $xoff > 0 } {
+	set x1 [length $x]
+	set x0 [expr { $x1 - $xoff }]
+	set ycenter [expr { [length $y] - $yoff }]
+	set xcenter [expr {0.5 * ($x0+$x1)}]
+	$canvas create line $x0 $ycenter $x1 $ycenter \
+		-arrow both -tag $atags
+	$canvas create text $xcenter $ycenter \
+		-anchor n -text $xoff -tag $atags
+    }
+    if { $yoff > 0 } {
+	set xcenter [length $x]
+	set y1 [length $y]
+	set y0 [expr { $y1 - $yoff }]
+	set ycenter [expr {0.5 * ($y0+$y1)}]
+	$canvas create line $xcenter $y0 $xcenter $y1 \
+		-arrow both -tag $atags
+	$canvas create text $xcenter $ycenter \
+		-anchor e -text $yoff -tag $atags
+    }
+}
+
+# --------------------------------------------------------------------
+#
+#  canvasDraw::visitRectangle
+#
+# --------------------------------------------------------------------
+
+itcl::body canvasDraw::visitRectangle { rectangle x y } {
+    #   (x0,y1) + ----------- + (x1,y1)
+    #           |             |
+    #   (x0,y0) + ----------- + (x1,y0)
+    set width [$rectangle width]
+    set height [$rectangle height]
+    set x0 [length $x]
+    set y0 [length $y]
+    set x1 [expr {$x0 + $width}]
+    set y1 [expr {$y0 + $height}]
+    set fillcolor [getFillColor]
+    lappend tags rectangle
+    $canvas create rectangle $x0 $y0 $x1 $y1 \
+	-fill $fillcolor -outline black -tags [concat $tags shape]
+
+    if { $annotate && ( ! $hlcsdlGroup || $firstInGroup ) } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	set xcenter [expr { ($x0 + $x1) * 0.5 }]
+	set ycenter [expr { ($y0 + $y1) * 0.5 }]
+	#  Create the text and arrows.  Note that we get the
+	#  string values directly from the shape, which
+	#  might include units.
+	$canvas create line $x0 $y0 $x1 $y0 \
+		-arrow both -tag $atags
+	$canvas create text $xcenter $y0 \
+		-anchor n -text "[$rectangle cget -width]" -tag $atags
+	$canvas create line $x0 $y0 $x0 $y1 \
+		-arrow both -tag $atags
+	$canvas create text $x0 $ycenter \
+		-anchor e -text "[$rectangle cget -height] " -tag $atags
+	set firstInGroup 0
+    }
+}
+
+# --------------------------------------------------------------------
+#
+#  canvasDraw::visitTrapezoid
+#
+# --------------------------------------------------------------------
+
+itcl::body canvasDraw::visitTrapezoid { trapezoid x y } {
+    #     (x1,y1) + ----------- + (x2,y1)
+    #            /               \
+    #   (x0,y0) + --------------- + (x3,y0)
+    set x [length $x]
+    set y [length $y]
+    set topWidth [length [$trapezoid cget -topWidth]]
+    set bottomWidth [length [$trapezoid cget -bottomWidth]]
+    set width [$trapezoid width]
+    set height [$trapezoid height]
+
+    set x0 [expr {$x + ($width - $bottomWidth)/2}]
+    set x1 [expr {$x + ($width - $topWidth)/2}]
+    set x2 [expr {$x + ($width + $topWidth)/2}]
+    set x3 [expr {$x + ($width + $bottomWidth)/2}]
+    set y0 $y
+    set y1 [expr {$y + $height}]
+
+    set fillcolor [getFillColor]
+    lappend tags trapezoid
+    $canvas create polygon $x0 $y0 $x1 $y1 $x2 $y1 $x3 $y0 \
+	-fill $fillcolor -outline black -tags [concat $tags shape]
+
+    if { $annotate && ( ! $hlcsdlGroup || $firstInGroup ) } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	set xcenter [expr {($x0 + $x3)/2}]
+	set ycenter [expr {($y0 + $y1)/2}]
+	$canvas create line $x0 $y0 $x3 $y0 \
+		-arrow both -tag $atags
+	$canvas create text $xcenter $y0 \
+		-anchor n -text $bottomWidth -tag $atags
+	$canvas create line $x1 $y1 $x2 $y1 \
+		-arrow both -tag annotation
+	$canvas create text $xcenter $y1 \
+		-anchor s -text $topWidth -tag $atags
+	$canvas create line $x0 $y0 $x0 $y1 \
+		-arrow both -tag $atags
+	$canvas create text $x0 $ycenter \
+		-anchor e -text "$height " -tag $atags
+	set firstInGroup 0
+    }
+}
+
+
+# --------------------------------------------------------------------
+#
+#  canvasDraw::visitCircle
+#
+# --------------------------------------------------------------------
+itcl::body canvasDraw::visitCircle { circle x y } {
+    #   (x0,y1) + --- + (x1,y1)
+    #           |     |          (just imagine a circle in the box)
+    #   (x0,y0) + --- + (x1,y0)
+    set diameter [length [$circle cget -diameter]]
+    set x0 [length $x]
+    set y0 [length $y]
+    set x1 [expr {$x0 + $diameter}]
+    set y1 [expr {$y0 + $diameter}]
+
+    set fillcolor [getFillColor]
+    lappend tags circle
+    $canvas create oval $x0 $y0 $x1 $y1 \
+	-fill $fillcolor -outline black -tags [concat $tags shape]
+
+    if { $annotate && ( ! $hlcsdlGroup || $firstInGroup ) } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	set xcenter [expr {[length $x] + [length $diameter]/2}]
+	$canvas create line $x0 $y0 $x1 $y0 \
+		-arrow both -tag $atags
+	$canvas create text $xcenter $y0 \
+		-anchor n -text $diameter -tag $atags
+	set firstInGroup 0
+    }
+}
+
+
+# --------------------------------------------------------------------
+#
+#  canvasDraw::visitLayer
+#
+# --------------------------------------------------------------------
+
+itcl::body canvasDraw::visitLayer { layer x y } {
+
+    #  The layer width is really $totalWidth.  Subtract
+    #  the X offset from X0.  (prim_coord will add it back in
+    #  to get us back to zero)
+    set x0 [expr {[length $x]-$xOffsetLayer}]
+    set x1 [expr {$x0 + $totalWidth}]
+
+    #  Figure out the layer thickness.  If the thickness is
+    #  zero, then set the drawing thickness to the minimum.
+    set y0 [length $y]
+    set thickness [length [$layer cget -thickness]]
+    if { $thickness > 0.0 } {
+	set y1 [expr {$y0 + $thickness}]
+    } else {
+	set y1 [expr {$y0 + $minThickness}]
+	set thickness $minThickness
+    }
+
+    set fillcolor [getFillColor]
+    lappend tags layer
+    $canvas create rectangle $x0 $y0 $x1 $y1 \
+	-fill $fillcolor -outline black \
+	-tags [concat $tags shape]
+
+
+    if { $annotate } {
+	# Append "annotation" to the tags list
+	set atags $tags
+	lappend atags annotation
+	# Add the description`
+	set xat [expr { $x1 - ( $x1 - $x0 ) * 0.1 }]
+	set yat $y1
+	set anchor ne
+	$canvas create text $xat $yat -anchor $anchor \
+		-text $description -tags $atags
+	# Add a dimension line
+	set x3 [expr {$x0 + 0.98*($x1-$x0)}]
+	set x3a [expr {$x0 + 0.97*($x1-$x0)}]
+	set y3 [expr {double($y0+$y1)/2}]
+	$canvas create line $x3 $y0 $x3 $y1 \
+		-arrow both -tag $atags
+	$canvas create text $x3a $y3 \
+		-anchor e -text $thickness -tag $atags
+    }
+}
+
+
+
+
+
+
+
+
+
+

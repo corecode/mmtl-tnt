@@ -1,0 +1,34 @@
+sppdgTcllib/INSTALL
+
+	sppdgTcllib package installation instructions
+
+
+This library is a collection of pure-tcl packages.  The library itself
+is really just a container for the other packages.  The only function
+of the pkgIndex.tcl file located here is to extend the auto_path to
+pick up subdirectories of this package.  This is similar to the tcllib
+package.
+
+But the installation is a little tricky.  Since we're using autoconf
+and automake to generate the configuration and make files, the
+subdirectories of this package would normally get installed directly
+into $(prefix)/lib.  But we want them to get installed into a
+subdirectory of this library.  So we play a trick in Makefile.am to
+redefine $(libdir).
+
+The bottom line is that this directory and its subdirectories get
+installed into $(prefix)/lib.  This should be fine for any application
+that includes sppdgTcllib as a component.  But it doesn't support the
+SPPDG standard for portable script libraries, which is to put them
+into //sppdgfs/lib/common.  For that, you must install the library,
+then manually move it to the proper place.
+
+  ./configure --prefix=//sppdgfs/software/lib/common
+  make
+  make install
+  mv //sppdgfs/software/lib/common/lib/sppdgTcllib* \
+     //sppdgfs/software/lib/common
+  rmdir //sppdgfs/software/lib/common/lib
+
+
+

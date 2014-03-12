@@ -1,0 +1,272 @@
+# -----------------------------------*-Tcl-*--------------------------
+#
+#  shapes.itcl
+#
+#  These Incr Tcl classes define the shapes of transmission
+#  line cross section structures.
+#
+#  Bob Techentin
+#  January 23, 2000
+#
+#  Copyright 2000-2004 Mayo Foundation.  All Rights Reserved.
+#  $Id: csdl_shapes.itcl,v 1.3 2004/02/09 18:56:01 techenti Exp $
+#
+# --------------------------------------------------------------------
+
+package require Itcl
+package require units
+
+package provide csdl 1.0.1
+
+# --------------------------------------------------------------------
+#
+#  itcl::class Shape 
+#
+#    Defines a shape of a structure in a transmission line
+#    cross section.  While we can't exactly declare a 
+#    virtual class, we can document the expected
+#    functionality of an object of type Shape.
+#
+#    A shape doesn't know _where_ it is, but it does
+#    know its height and width and color.
+#
+#    Shapes don't do much interesting, but they can accept
+#    a visitor class which can do interesting things like
+#    draw them.
+#
+# options
+#
+#  -color
+#    Each shape has an intrinsic color, which is defined
+#    by the object which creates it.  Note that some simulators,
+#    (i.e., BEM MMTL) depend upon color to properly identify
+#    the type of structure.  (blue==ground)
+#
+#  -description
+#    A text description, set by the creator.  This text is
+#    displayed when the Shape draws itself.  The creator
+#    would typically use this description to display the
+#    name and/or attributes of the structure.
+#
+# methods
+#
+#  width
+#  height
+#  area
+#  circumference
+#    These methods return the width, height, area, or 
+#    circumference of the shape, as a floating point number, 
+#    scaled to the default length units, as defined in the variable 
+#    ::units::default(Length)
+#
+#    These are useful for drawing routines which operate
+#    on lists of Shapes.  Since the caller doesn't know the
+#    specific gemoetry of any given shape, it can just ask
+#    the shape for the amount of space that it needs.
+#
+# --------------------------------------------------------------------
+
+itcl::class Shape {
+    public variable name ""
+    public variable color ""
+    public variable description ""
+    method accept { visitor x y } {
+	#  Cleverly call a visitor based on our class name
+	scan [info class] "::%s" myClass
+	$visitor visit$myClass $this $x $y
+    }
+    method width {}
+    method height {}
+    method area {}
+    method circumference {}
+}
+
+itcl::class Rectangle {
+    inherit Shape
+    public variable width 0.0
+    public variable height 0.0
+    constructor {args} {
+	eval configure $args
+    }
+    method width {}
+    method height {}
+    method area {}
+    method circumference {}
+}
+
+itcl::class Trapezoid {
+    inherit Shape
+    public variable topWidth 0.0
+    public variable bottomWidth 0.0
+    public variable height 0.0
+    constructor {args} {
+	eval configure $args
+    }
+    method width {}
+    method height {}
+    method area {}
+    method circumference {}
+}
+
+itcl::class Circle {
+    inherit Shape
+    public variable diameter 0.0
+    constructor {args} {
+	eval configure $args
+    }
+    method width {}
+    method height {}
+    method area {}
+    method circumference {}
+}
+
+itcl::class Layer {
+    inherit Shape
+    public variable thickness 0.0
+    constructor {args} {
+	eval configure $args
+    }
+    method width {}
+    method height {}
+    method area {}
+    method circumference {}
+}
+
+
+
+# --------------------------------------------------------------------
+#  Rectangle methods
+# --------------------------------------------------------------------
+
+itcl::configbody Rectangle::width {check_length $width "width"}
+itcl::configbody Rectangle::height {check_length $height "height"}
+
+itcl::body Rectangle::width {} {return [length $width]}
+
+itcl::body Rectangle::height {} {return [length $height]}
+
+itcl::body Rectangle::area {} {
+    return [expr {[length $width]*[length $height]}]
+}
+
+itcl::body Rectangle::circumference {} {
+    return [expr {2.0*([length $width]+[length $height])}]
+}
+
+
+# --------------------------------------------------------------------
+#  Trapezoid methods
+# --------------------------------------------------------------------
+
+itcl::configbody Trapezoid::topWidth {check_length $topWidth "top width"}
+itcl::configbody Trapezoid::bottomWidth {check_length $bottomWidth "bottom width"}
+itcl::configbody Trapezoid::height {check_length $height "height"}
+
+itcl::body Trapezoid::width {} {
+    if {[length $topWidth]>[length $bottomWidth]} {
+	return [length $topWidth]
+    } else {
+	return [length $bottomWidth]
+    }
+}
+
+itcl::body Trapezoid::height {} {return [length $height]}
+
+itcl::body Trapezoid::area {} {
+    set h [length $height]
+    set tw [length $topWidth]
+    set bw [length $bottomWidth]
+    return [expr {$h * ($tw + $bw)/2.0}]
+}
+itcl::body Trapezoid::circumference {} {
+    #
+    #       +-------------+      +
+    #      /               \     | h = height
+    #     /                 \    |
+    #    +-------------------+   +
+    #                     +--+ base
+    set h [length $height]
+    set tw [length $topWidth]
+    set bw [length $bottomWidth]
+    set base [expr {0.5*abs($tw-$bw)}]
+    set sidelength [expr {sqrt($h*$h + $base*$base)}]
+    return [expr {$tw + $bw + 2.0*$sidelength}]
+}
+
+
+# --------------------------------------------------------------------
+#  Circle methods
+# --------------------------------------------------------------------
+
+itcl::configbody Circle::diameter {check_length $diameter "diameter"}
+
+itcl::body Circle::width {} {return [length $diameter]}
+
+itcl::body Circle::height {} {return [length $diameter]}
+
+itcl::body Circle::area {} {
+    set pi 3.14159265358979323846
+    set d [length $diameter]
+    return [expr {$pi * $d*$d / 4.0}]
+}
+
+itcl::body Circle::circumference {} {
+    set pi 3.14159265358979323846
+    set d [length $diameter]
+    return [expr {$pi * $d}]
+}
+
+
+# --------------------------------------------------------------------
+#  Layer methods
+# --------------------------------------------------------------------
+
+itcl::configbody Layer::thickness {check_length $thickness "thickness"}
+
+itcl::body Layer::width {} {
+    #  as far as anybody checking on the width of all the
+    #  cross section structures  is concerned, the layer
+    #  width is 2x the thickness.  But we draw it "wide"
+    #  when compared to the width of all the other layers
+    #  and structures.
+    return [expr {[length $thickness]*2}]
+}
+
+itcl::body Layer::height {} {return [length $thickness]}
+
+
+
+set ::units::default(Length) meter
+set ::units::default(Time) second
+
+proc check_length { value name } {
+    global units::default
+    if { $value == "" } {
+	error "'$name' value is required"
+    }
+    if { [catch {units::convert $value $units::default(Length)} result] } {
+	error "Invalid Dimension '$name':  $result"
+    }
+    if { $result < 0.0 } {
+	error "Invalid '$name':  Negative dimensions are not allowed"
+    }
+}
+
+proc length { value } {
+    # add default units, if necessary
+    if { [string is double $value] } {
+	append value $units::default(Length)
+    }
+    units::convert $value $units::default(Length)
+}
+
+proc time { value } {
+    # add default units, if necessary
+    if { [string is double $value] } {
+	append value $units::default(Time)
+    }
+    units::convert $value $units::default(Time)
+}
+
+
+

@@ -1,0 +1,21 @@
+--------------------------------------------------------
+Resistance/Inductance Values
+Input file: jc.data.in
+--------------------------------------------------------
+Frequency: 1e+06     Conductivity: 5.6e+07
+
+2X2 Resistance Matrix (Ohm/m):
+
+3.87988e-22     -1.1811e-23     
+
+-1.1811e-23     3.94164e-22     
+
+2X2 Inductance Matrix (H/m):
+
+4.00195e-07     9.12573e-08     
+
+9.12573e-08     4.10143e-07     
+
+
+User CPU time: 18
+ Sys CPU time: 0

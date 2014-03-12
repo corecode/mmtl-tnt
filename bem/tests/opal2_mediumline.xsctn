@@ -1,0 +1,27 @@
+#----------------------------------
+# File:  /users/zahn/lib/bem/tests/opal2_mediumline.xsctn
+# Wed Sep 25 13:20:05 DST 2002
+#----------------------------------
+
+package require csdl
+
+set _title ""
+set ::Stackup::couplingLength "1654mils"
+set ::Stackup::riseTime "60"
+set ::Stackup::frequency "9000MHz"
+set ::Stackup::defaultLengthUnits "mils"
+set CSEG 10
+set DSEG 15
+
+GroundPlane G14 
+DielectricLayer D16  \
+	 -thickness 8 \
+	 -lossTangent 0.003 \
+	 -permittivity 3.38
+RectangleConductors Rect11  \
+	 -width 17 \
+	 -pitch 0 \
+	 -conductivity 5.959e7siemens/meter \
+	 -height 0.5 \
+	 -yOffset 0 \
+	 -xOffset 17

@@ -1,0 +1,13 @@
+---------------------------------------
+Capacitance Values
+Input file : /sppdg/software/src/tnt/calcCAP/tests/LP1.in
+---------------------------------------
+ [0][0] = 106.074
+ [1][0] = -79.8756
+ [0][1] = -79.8758
+ [1][1] = 106.075
+
+Estimated Maximum Computational Error is: 0
+
+User CPU time: 19
+ Sys CPU time: 0

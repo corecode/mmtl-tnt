@@ -1,0 +1,166 @@
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:22:59 DST revision 1.1 by zahn
+checkpointed, new revision 1.1
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:33 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/adfunc.cpp add
+/sppdg/software/src/tnt/calcRL/src/adfunc.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/adfunc.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:34 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/adfunc.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/adfunc.h add
+/sppdg/software/src/tnt/calcRL/src/adfunc.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/adfunc.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:34 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/adfunc.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/bicgstab.cpp add
+/sppdg/software/src/tnt/calcRL/src/bicgstab.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/bicgstab.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:35 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/bicgstab.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/bicgstab.h add
+/sppdg/software/src/tnt/calcRL/src/bicgstab.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/bicgstab.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:35 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/bicgstab.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/calcRI.exe add
+/sppdg/software/src/tnt/calcRL/src/calcRI.exe new-type a was f
+/sppdg/software/src/tnt/calcRL/src/calcRI.exe new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:36 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/calcRI.exe new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/calcRL.cpp add
+/sppdg/software/src/tnt/calcRL/src/calcRL.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/calcRL.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:36 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/calcRL.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.cpp add
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:36 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.h add
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:37 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/cmplxmat.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.cpp add
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:37 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.h add
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:37 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/cmplxvec.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/coif4.cpp add
+/sppdg/software/src/tnt/calcRL/src/coif4.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/coif4.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:38 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/coif4.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/coif4.h add
+/sppdg/software/src/tnt/calcRL/src/coif4.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/coif4.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:38 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/coif4.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/complex.cpp add
+/sppdg/software/src/tnt/calcRL/src/complex.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/complex.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:39 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/complex.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/complex.h add
+/sppdg/software/src/tnt/calcRL/src/complex.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/complex.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:39 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/complex.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/data.cpp add
+/sppdg/software/src/tnt/calcRL/src/data.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/data.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:39 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/data.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/data.h add
+/sppdg/software/src/tnt/calcRL/src/data.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/data.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:40 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/data.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/gauleg.cpp add
+/sppdg/software/src/tnt/calcRL/src/gauleg.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/gauleg.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:40 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/gauleg.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/gauleg.h add
+/sppdg/software/src/tnt/calcRL/src/gauleg.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/gauleg.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:40 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/gauleg.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/hankel.cpp add
+/sppdg/software/src/tnt/calcRL/src/hankel.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/hankel.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:41 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/hankel.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/hankel.h add
+/sppdg/software/src/tnt/calcRL/src/hankel.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/hankel.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:41 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/hankel.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/ivectorl.cpp add
+/sppdg/software/src/tnt/calcRL/src/ivectorl.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/ivectorl.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:41 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/ivectorl.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/ivectorl.h add
+/sppdg/software/src/tnt/calcRL/src/ivectorl.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/ivectorl.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:42 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/ivectorl.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/kelvin.cpp add
+/sppdg/software/src/tnt/calcRL/src/kelvin.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/kelvin.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:42 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/kelvin.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/kelvin.h add
+/sppdg/software/src/tnt/calcRL/src/kelvin.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/kelvin.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:42 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/kelvin.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/makeOpt add
+/sppdg/software/src/tnt/calcRL/src/makeOpt new-type a was f
+/sppdg/software/src/tnt/calcRL/src/makeOpt new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:43 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/makeOpt new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/makeOpt~ add
+/sppdg/software/src/tnt/calcRL/src/makeOpt~ new-type a was f
+/sppdg/software/src/tnt/calcRL/src/makeOpt~ new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:43 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/makeOpt~ new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/matrix.cpp add
+/sppdg/software/src/tnt/calcRL/src/matrix.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/matrix.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:43 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/matrix.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/matrix.h add
+/sppdg/software/src/tnt/calcRL/src/matrix.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/matrix.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:44 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/matrix.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/myfunc.cpp add
+/sppdg/software/src/tnt/calcRL/src/myfunc.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/myfunc.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:44 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/myfunc.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/myfunc.h add
+/sppdg/software/src/tnt/calcRL/src/myfunc.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/myfunc.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:45 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/myfunc.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/sparse.cpp add
+/sppdg/software/src/tnt/calcRL/src/sparse.cpp new-type a was f
+/sppdg/software/src/tnt/calcRL/src/sparse.cpp new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:45 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/sparse.cpp new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/sparse.h add
+/sppdg/software/src/tnt/calcRL/src/sparse.h new-type a was f
+/sppdg/software/src/tnt/calcRL/src/sparse.h new-rules was none
++/sppdg/software/src/tnt/calcRL/src/src.pj 2002.10.09 15:23:52 DST revision 1.1 by zahn
+/sppdg/software/src/tnt/calcRL/src/sparse.h new-revision 1.1 was none
+/sppdg/software/src/tnt/calcRL/src/src.trn add
+/sppdg/software/src/tnt/calcRL/src/src.trn new-type a was f
+/sppdg/software/src/tnt/calcRL/src/src.trn new-rules was none

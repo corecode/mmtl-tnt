@@ -1,0 +1,72 @@
+TNT Installation Instructions
+------------------------------
+
+
+TNT is free software.  These instructions should help you configure,
+build, and install TNT from the source code.
+
+
+Compiling and Installing TNT
+----------------------------
+
+To compile TNT, you will need the following on your machine:
+
+  C, C++, and FORTRAN compilers
+  pdflatex and latex2html for documentation
+
+To compile and install TNT, type the following
+
+  ./configure --prefix=/location/to/install/tnt
+  make
+  make install
+
+The configure script will analyze your system and generate makefiles
+with the proper flags and macros.  You really should use the
+--prefix=xxx option to control the installation location.  Installing
+to the default locations (/usr/bin, /usr/lib, etc.) will spread the
+application files all over your system, and it will install README and
+the license file into /usr.  Configure's --help option will list other
+options and explain defaults.
+
+To choose a new compiler, you can set environment variables or
+set flags on the configure command line.  The autotools will 
+generally try to use the GNU compilers (gcc, g++, g77), but you
+could select a native compilers like this.
+
+  ./configure CC=c89 CXX=CC F77=f90
+
+Builds have been tested on Red Hat Fedora Core 2 Linux, HP-UX 11,
+and Microsoft Windows under Cygwin, but the code should compile on
+other Unix-like systems as well.  
+
+
+
+Running TNT
+-----------
+
+Running TNT requires a functioning installation of Tcl with Tk,
+BWidget, Incr Tcl, and IWidgets extensions.  These are available in
+source code form from http://tcl.sourceforge.net/,
+http://tcllib.sourceforge.net/, and http://incrtcl.sourceforge.net/.
+You may also get a pre-compiled package called ActiveTcl from
+http://activestate.com/tcl/
+
+To run TNT, make sure that the TNT package /bin directory and the wish
+interpreter are both in your PATH.  Run tnt from the command line or
+from a shortcut.  See the user guide for details on TNT operation.
+
+
+Installing on Microsoft Windows
+-------------------------------
+
+TNT has been compiled and installed on Microsoft Windows computers
+using the Cygwin development package from
+http://sources.redhat.com/cygwin/.  The same configure/make/make
+install process described for Unix systems should work from the Cygwin
+command window.
+
+If you get the Windows binary installation of TNT, then compiling and
+installing from the command line will not be necessary.  Just follow
+the usual installation procedures for Windows applications.
+
+
