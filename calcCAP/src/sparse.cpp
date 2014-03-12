@@ -2,14 +2,14 @@
 
 //#include "stdafx.h"
 #include <math.h>
-#include <iostream.h>
+#include <iostream>
 #include <stdlib.h>
-#include <iomanip.h>
+#include <iomanip>
 
-#include "complex.h" 
-#include "vector.h" 
-#include "matrix.h" 
-#include "cmplxvec.h" 
+#include "complex.h"
+#include "vector.h"
+#include "matrix.h"
+#include "cmplxvec.h"
 #include "cmplxmat.h"
 #include "ivectorl.h"
 
@@ -20,7 +20,7 @@ void  sprsin_d( Matrix& a, double thresh, Vector& sa, IVectorl& ija ) {
 
     const int  ns = a.dim_i();
     int        i, j, k, nh;
-     
+
     nh = ns + 1;
 
     for( i = 0; i < ns; i++ ) {
@@ -34,7 +34,7 @@ void  sprsin_d( Matrix& a, double thresh, Vector& sa, IVectorl& ija ) {
 
     sa.resize( nh );
     ija.resize( nh );
-    
+
     for( j = 0; j < ns; j++ )
         sa[j] = a(j,j);
 
@@ -50,22 +50,22 @@ void  sprsin_d( Matrix& a, double thresh, Vector& sa, IVectorl& ija ) {
                k += 1;
                sa[k] = a(i,j);
                ija[k] = j;
-            }               
+            }
         }
 
         ija[i+1] = k + 1;
     }
 
-    a.resize(0,0);             
-}    
-   
+    a.resize(0,0);
+}
+
 
 void  sprsax_d( Vector& sa, IVectorl& ija, Vector& x, Vector& b ) {
 
     const int  ns = x.dim();
-    int        i, k; 
+    int        i, k;
 
-    b.resize(ns); 
+    b.resize(ns);
 
     if( ija[0] != ns + 1 ) {
 
@@ -74,13 +74,13 @@ void  sprsax_d( Vector& sa, IVectorl& ija, Vector& x, Vector& b ) {
     }
 
     for( i = 0; i < ns; i++ ) {
-        
+
       b[i] = sa[i] * x[i]; //cerr << i << endl;
 
         for( k = ija[i]; k <= ija[i+1]-1; k++ ) {
 
 	  //cerr << k << endl;
- 	    b[i] += sa[k] * x[ija[k]]; 
+ 	    b[i] += sa[k] * x[ija[k]];
         }
     }
 }
@@ -105,11 +105,11 @@ void  sprsin_c( CmplxMatrix& a, double thresh, CmplxVector& sa, IVectorl& ija ) 
     cout << " Matrix sparsity = "
          << double( nh ) / double( ns * ns ) * 100.0
          << " % "
-         << endl; 
-      
+         << endl;
+
     sa.resize( nh );
     ija.resize( nh );
-    
+
     for( j = 0; j < ns; j++ )
         sa[j] = a(j,j);
 
@@ -125,22 +125,22 @@ void  sprsin_c( CmplxMatrix& a, double thresh, CmplxVector& sa, IVectorl& ija ) 
                k += 1;
                sa[k] = a(i,j);
                ija[k] = j;
-            }               
+            }
         }
 
         ija[i+1] = k + 1;
     }
 
-    a.resize(0,0);             
-}    
-   
+    a.resize(0,0);
+}
+
 
 void  sprsax_c( CmplxVector& sa, IVectorl& ija, CmplxVector& x, CmplxVector& b ) {
 
     const int  ns = x.dim();
-    int        i, k; 
+    int        i, k;
 
-    b.resize(ns); 
+    b.resize(ns);
 
     if( ija[0] != ns + 1 ) {
 
@@ -149,7 +149,7 @@ void  sprsax_c( CmplxVector& sa, IVectorl& ija, CmplxVector& x, CmplxVector& b )
     }
 
     for( i = 0; i < ns; i++ ) {
-        
+
         b[i] = sa[i] * x[i];
 
         for( k = ija[i]; k <= ija[i+1]-1; k++ ) {
@@ -165,7 +165,7 @@ Vector  sprsax_d_v( Vector& sa, IVectorl& ija, Vector& x ) {
     Vector res;
 
     sprsax_d( sa, ija, x, res );
- 
+
     return( res );
 }
 
@@ -175,7 +175,7 @@ CmplxVector  sprsax_c_v( CmplxVector& sa, IVectorl& ija, CmplxVector& x ) {
     CmplxVector res;
 
     sprsax_c( sa, ija, x, res );
- 
+
     return( res );
 }
 
@@ -185,7 +185,7 @@ void sprsin_simple( CmplxMatrix& a, double lev ) {
     for( int m = 0; m < a.dim_i(); m++ ) {
 
 	for( int n = 0; n < a.dim_j(); n++ ) {
-               
+
             if( cabs( a(m,n) ) < lev )
                a(m,n) = 0.0;
         }
@@ -195,9 +195,9 @@ void sprsin_simple( CmplxMatrix& a, double lev ) {
 
 CmplxVector  sprsax_c_v_simple( CmplxMatrix& a, CmplxVector& v ) {
 
-    const int    mi = a.dim_i();  
+    const int    mi = a.dim_i();
     const int    nj = a.dim_j();
-    int          m, n;    
+    int          m, n;
     CmplxVector  res(mi,0.0);
 
     for( m = 0; m < mi; m++ ) {
@@ -208,6 +208,6 @@ CmplxVector  sprsax_c_v_simple( CmplxMatrix& a, CmplxVector& v ) {
                res[m] += a(m,n) * v[n];
         }
     }
-     
-    return( res );  
+
+    return( res );
 }

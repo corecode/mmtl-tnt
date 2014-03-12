@@ -1,37 +1,37 @@
 /***********************************************************/
-/***                                                     ***/ 
+/***                                                     ***/
 /***   Resistance and Inductance using Coifman wavelets  ***/
 /***            for the method of moments                ***/
 /***                                                     ***/
 /***               by Zhichao Zhang                      ***/
-/***                    2001.3                           ***/ 
+/***                    2001.3                           ***/
 /***                                                     ***/
 /***********************************************************/
 /***********************************************************
 Abstract:
-The frequency-dependent resistance and inductance of uniform 
-transmission lines are calculated with a hybrid technique that 
+The frequency-dependent resistance and inductance of uniform
+transmission lines are calculated with a hybrid technique that
 combines a cross-section coupled circuit method with a surface
 integral equation approach.  The coupled circuit approach is
-most applicble for low-frequency calculations, while the 
+most applicble for low-frequency calculations, while the
 integral equation approach is best for high frequencies.  The
 low-frequency method consists in subdividing the cross section
 of each conductor into triangular filaments, each with an
-assumed uniform currect distribution.  The resistance and 
+assumed uniform currect distribution.  The resistance and
 mutual inductance between the filaments are clculated, and a
 matrix is inverted to give the overall resistance and
-inductance of the conductors.  The high-frequency method 
+inductance of the conductors.  The high-frequency method
 expresses the resistance and inductance of each conductor in
 terms of the current at the surface of that conductor and the
 derivative of that current normal to the surface.  A coupled
-integral equation is then derived to relate these qualities 
+integral equation is then derived to relate these qualities
 through the diffusion equation inside the conductors and
-La;lace's equation outside.  The method of moments with 
+La;lace's equation outside.  The method of moments with
 pulse basis functions is used to solve the integral equations.
-An interpolation between the results of these two methods gives 
+An interpolation between the results of these two methods gives
 very good results over the entire frequency range, even when few
 basis functions are used.  Results for a variety of configurations
-are shown and are compared with experimental data and other 
+are shown and are compared with experimental data and other
 numerical techniques.
 **************************************************************/
 
@@ -43,6 +43,7 @@ numerical techniques.
 #endif
 #include <time.h>
 #include <stdio.h>
+#include <string.h>
 
 /********************** Global variables *******************/
 
@@ -83,20 +84,20 @@ int  append;
 
 int main ( int argc, char *argv[] )
 {
-  
+
   /************ to setup global parameters *********/
-    
+
   char fileName[1024], fileOut[1024], fileRL[1024], fileXmgrR[1024];
   char fileXmgrL[1024], strg[20];
-   
+
   //---------------------------------------------------------------
   // Get the input and output file names from the command-line.
   //---------------------------------------------------------------
   if ( argc > 0)
-    strcpy (fileName, argv[1]);    
+    strcpy (fileName, argv[1]);
   else
     strcpy (fileName, "data");
-  
+
   append = 0;
   if ( argc > 1 )
     {
@@ -106,10 +107,10 @@ int main ( int argc, char *argv[] )
 	  cout << "Append to existing data in file" << endl;
 	}
     }
-  
+
   if ( strlen(fileName) < 2 )
     strcpy (fileName, "data");
-  
+
   sprintf (fileIn, "%s.in", fileName);
   sprintf (fileOut, "%s.out", fileName);
   sprintf (fileRL, "%s.out.rl", fileName);
@@ -133,9 +134,9 @@ int main ( int argc, char *argv[] )
 
   time(&start_time);
   tme1 = start_time;
-  
+
   /************ define variables *******************/
-  
+
   const   int  NN = 2*Nc*Nw+Nc;
   int          i, j, m, n, k, n0, j1, i1, ix, i2, j2, k2;
   int          jn, kn, jm, km, jx, iy;
@@ -151,14 +152,14 @@ int main ( int argc, char *argv[] )
   Matrix       uns(3, Nw);
   CmplxVector  Rhsw(NN), Jnj(NN), xc;
   CmplxMatrix  Pw(NN, NN), Pwt(NN, NN);
-  
+
   Vector       Res(Nc), Ind(Nc), sum1(Nc);
   Matrix       Res1(Nc, Nc), Ind1(Nc, Nc), matout;
   CmplxVector  sum2(Nc);
   double       rsum, isum, tmpsum1, tmpsum2, tst, tempc;
   Complex      tmpv0, tmpvi, tmpu0, tmpui, tmp0v0, tmp0vi, tmp0u0, tmp0ui;
   Complex      sumv0, sumvi, sumu0, sumui, temsum;
-  
+
   ofstream *xmgrRdata;
   ofstream *xmgrLdata;
   ofstream *rldata;
@@ -192,8 +193,8 @@ int main ( int argc, char *argv[] )
       xmgrRdata = new ofstream( fileXmgrR, ios::out);
 
       xmgrLdata = new ofstream( fileXmgrR, ios::out);
-    }  
-  
+    }
+
   if ( init )
     {
       cout << "Initializing the xmgr files" << endl;
@@ -234,21 +235,21 @@ int main ( int argc, char *argv[] )
     }
 
   //  cout << "start" << endl;
-  
+
   getcoif4( sxc4, sc4, wxc4, wc4, Nit );
   getsbs( uns );
-  
+
   /** points and weights for Gauss the method */
-  
+
   gauleg( -1.0, 1.0, ptwx, whwx );
   gauleg( -1.0, 1.0, ptwy, whwy );
-  
+
   for(i = 0; i < Nw; i++) {
-    
+
     tn[i] = i*step_w;
-    
+
   }
-    
+
   //  time(&tme2);
   //  cout << "time 1: " << tme2 - tme1 << endl;
   //  tme1 = tme2;
@@ -257,19 +258,19 @@ int main ( int argc, char *argv[] )
   int idx, idx2, jdx, jdx2;
 
   /***** to create system matrix **************/
-  
+
   for(i1 = 0; i1 < Nc; i1 ++) {
-    
+
     //    cout << i1 << endl;
     double hcircum = 0.5 * Circum[i1];
     for(i = 0; i < Nw; i ++) {
 
       idx = i1*Nw+i;
-      idx2 =(Nc+i1)*Nw+i;      
+      idx2 =(Nc+i1)*Nw+i;
       for(j1 = 0; j1 < Nc; j1 ++) {
-	
+
 	tmp2 = step_w*Circum[j1];
-	
+
 	for(j = 0; j < Nw; j ++) {
 
 	  jdx = j1*Nw+j;
@@ -279,9 +280,9 @@ int main ( int argc, char *argv[] )
 	  sumu0 = 0.0;
 	  sumvi = 0.0;
 	  sumui = 0.0;
-	  
+
 	  if(i1 == j1 && i == j) {
-	    
+
 	    for(m = 0; m < Nws; m ++) {
 	      tmp3 = double(m) + 0.5;
 	      tmp3 *= hw;
@@ -289,32 +290,32 @@ int main ( int argc, char *argv[] )
 	      //	      ycnt[m] = uns(1,i) + hw * tmp3;
 	      xcnt[m] = uns(1,j) + tmp3;
 	      ycnt[m] = uns(1,i) + tmp3;
-	      
+
 	    }
-	      
+
 	    for(iy = 0; iy < Nws; iy ++) {
-	      
+
 	      for(jx = 0; jx < Nws; jx ++) {
-		
+
 		intpnt( xcnt[jx], twx, wwx, ptwx, whwx,
 			ycnt[iy], twy, wwy, ptwy, whwy,
 			hwh );
-		
+
 		tmpv0 = 0.0;
 		tmpu0 = 0.0;
 		tmpvi = 0.0;
 		tmpui = 0.0;
-		
+
 		for(m = 0; m < Nwy; m ++) {
-		  
+
 		  tmp0v0 = 0.0;
 		  tmp0u0 = 0.0;
 		  tmp0vi = 0.0;
 		  tmp0ui = 0.0;
-		  
+
 		  for( n = 0; n < Nwx; n++ ) {
 		    tmp3 = wwx[n] * scalcoif4( twx[n], J, j, sc4 );
-		    tmp0v0 += kernel_v0( twy[m], twx[n], i1, j1 ) * 
+		    tmp0v0 += kernel_v0( twy[m], twx[n], i1, j1 ) *
 		      tmp3;
 		    tmp0u0 += kernel_u0( twy[m], twx[n], i1, j1 ) *
 		      tmp3;
@@ -322,22 +323,22 @@ int main ( int argc, char *argv[] )
 		      tmp3;
 		    tmp0ui += kernel_ui( twy[m], twx[n], i1, j1 ) *
 		      tmp3;
-		    
+
 		  }
-		  
+
 		  tmp3 = wwy[m] * scalcoif4( twy[m], J, i, sc4 );
 		  tmpv0 += tmp0v0 * tmp3;
 		  tmpu0 += tmp0u0 * tmp3;
 		  tmpvi += tmp0vi * tmp3;
 		  tmpui += tmp0ui * tmp3;
-		  
+
 		}
-		
+
 		sumv0 += tmpv0;
 		sumu0 += tmpu0;
 		sumvi += tmpvi;
 		sumui += tmpui;
-		
+
 	      }
 	    }
 	    tmp1 = Circum[j1] * Circum[i1];
@@ -345,41 +346,41 @@ int main ( int argc, char *argv[] )
 	    sumvi = sumvi * tmp1;
 	    sumu0 = sumu0 * tmp1 - hcircum;
 	    sumui = sumui * tmp1 + hcircum;
-	    
+
 	  } else if (i1 == j1 && i != j) {
-	    
+
 	    tmp3 = tmp2 * Circum[i1];
 	    sumv0 = kernel_v0( tn[i], tn[j], i1, j1 ) * tmp3;
 	    sumvi = kernel_vi( tn[i], tn[j], i1, j1 ) * tmp3;
 	    sumu0 = kernel_u0( tn[i], tn[j], i1, j1 ) * tmp3;
 	    sumui = kernel_ui( tn[i], tn[j], i1, j1 ) * tmp3;
-	    
+
 	  } else {
-	    
+
 	    tmp3 = tmp2 * Circum[i1];
 	    sumv0 = kernel_v0( tn[i], tn[j], i1, j1 ) * tmp3;
 	    sumvi = 0.0;
 	    sumu0 = kernel_u0( tn[i], tn[j], i1, j1 ) * tmp3;
 	    sumui = 0.0;
-	    
+
 	  }
-	  
+
 	  Pwt(idx, jdx) = sumv0;
 	  Pwt(idx2, jdx) = sumvi;
 	  Pwt(idx, jdx2) = -sumu0;
 	  Pwt(idx2, jdx2) = -sumui;
-	  
+
 	}
       }
     }
   }
-  
+
   //  time(&tme2);
   //  cout << "time 2: " << tme2 - tme1 << endl;
   //  tme1 = tme2;
 
   for(i = 0; i < Nc; i ++) {
-    
+
     if(i < Gnd) {
       tempc = Gndc[i];
     } else if(i >= Gnd && i < (Gnd + Rec)) {
@@ -389,14 +390,14 @@ int main ( int argc, char *argv[] )
     } else if(i >= (Gnd + Rec + Cir) && i < (Gnd + Rec + Cir + Tra)) {
       tempc = Trac[i-Gnd-Rec-Cir];
     }
-    
+
     for(j = 0; j < Nw; j ++) {
-      
+
       Pwt(2*Nw*Nc+i, i*Nw+j) = tempc * tempc;
       Pwt(i*Nw+j, 2*Nw*Nc+i) = tempc / power(2.0, double(J)/2.0);
-      
+
     }
-    
+
   }
 
   //  time(&tme2);
@@ -407,22 +408,22 @@ int main ( int argc, char *argv[] )
   //  cout << NN
   //       << "X"
   //       << NN
-  //       << " System Matrix Created !!! " 
+  //       << " System Matrix Created !!! "
   //       << endl;
-  
+
   /* Solve equation for different current combination */
-  
+
   for(i2 = 1; i2 < Nc; i2 ++) {
-    
+
     for(j2 = i2; j2 < Nc; j2 ++) {
-      
+
       ///      cout << i2 << endl;
       //      cout << j2 <<endl;
-      
+
       if(i2 == j2) {
-	
+
 	Iq_sq[0] = -1.0;
-	
+
 	for (k2 = 1; k2 < Nc; k2 ++) {
 	  if(k2 == j2) {
 	    Iq_sq[k2] = 1.0;
@@ -430,9 +431,9 @@ int main ( int argc, char *argv[] )
 	    Iq_sq[k2] = 0.0;
 	  }
 	}
-	
+
       } else {
-	
+
 	for (k2 = 0; k2 < Nc; k2 ++) {
 	  if(k2 == i2) {
 	    Iq_sq[k2] = 1.0;
@@ -442,13 +443,13 @@ int main ( int argc, char *argv[] )
 	    Iq_sq[k2] = 0.0;
 	  }
 	}
-	
+
       }
-      
+
       for(i = 0; i < 2*Nc*Nw; i ++) {
 	Rhsw[i] = 0.0;
-      } 
-      
+      }
+
       for(i = 0; i < Nc; i ++) {
 	if(i < Gnd) {
 	  tempc = Gndc[i];
@@ -461,7 +462,7 @@ int main ( int argc, char *argv[] )
 	}
 	Rhsw[2*Nc*Nw+i] = (-1.0)*Ic*Iq_sq[i]*oms*tempc/power(2.0,double(J)/2.0);
       }
-      
+
       //  time(&tme2);
       //  cout << "time 4: " << tme2 - tme1 << endl;
       //  tme1 = tme2;
@@ -469,52 +470,52 @@ int main ( int argc, char *argv[] )
   //      cout << endl
   //	   << "Right hand side vector created!! "
   //	   << endl;
-      
+
       for(i = 0; i < NN; i ++) {
-	
+
 	for(j = 0; j < NN; j ++) {
-	  
+
 	  Pw(i,j) = Pwt(i,j);
-	  
+
 	}
-	
+
       }
-      
+
       /*  By Using LU Decomposition  */
       if(matr == 1) {
 	ludcmp( Pw, Indx, dlu );
 	lubksb( Pw, Rhsw, Indx );
       }
-      
+
       /*  By Using Stab */
       if(matr == 2) {
 	xc.resize(NN);
 	bi_cgstab_c( Pw, xc, Rhsw, EPS );
 	Rhsw = xc;
       }
-      
-      //      cout << " System of linear equations for N = " 
-      //	   << NN                
-      //	   << " solved !!! " 
+
+      //      cout << " System of linear equations for N = "
+      //	   << NN
+      //	   << " solved !!! "
       //	   << endl;
-      
+
       /* To calculate the resistance and inductance ****/
-      
+
       for(i = 0; i < Nw; i ++) {
-	
+
 	ts[i] = double(i)/double(Nw);
-	
+
       }
-      
+
       for(ix = 0; ix < Nc; ix ++) {
-	
+
 	for(i = 0; i < Nw; i ++) {
-	  
+
 	  tmp = 0.0;
 	  tmp0 = 0.0;
-	  
+
 	  for(j = i-7; j <= i+4; j ++) {
-	    
+
 	    if(j < 0) {
 	      tst = ts[i] + 1.0;
 	      j1 = j + Nw;
@@ -525,107 +526,107 @@ int main ( int argc, char *argv[] )
 	      tst = ts[i];
 	      j1 = j;
 	    }
-	    
+
 	    tmp += scalcoif4( tst, J, j1, sc4 ) * Rhsw[ix*Nw+j1];
 	    tmp0 += scalcoif4( tst, J, j1, sc4 ) * Rhsw[(ix+Nc)*Nw+j1];
-	    
+
 	  }
-	  
+
 	  Jnj[ix*Nw+i] = tmp;
 	  Jnj[(ix+Nc)*Nw+i] = tmp0;
-	  
+
 	}
-	
+
       }
-      
+
       for (i = 0; i < Nc; i ++) {
-	
+
 	Jnj[2*Nc*Nw+i] = Rhsw[2*Nc*Nw+i];
-	
+
       }
-      
+
       for (i = 0; i < Nc; i ++) {
-	
+
 	sum1[i] = 0.0;
 	Res[i] = 0.0;
 	Ind[i] = 0.0;
-	
+
       }
 
       //  time(&tme2);
       //  cout << "time 5: " << tme2 - tme1 << endl;
       //  tme1 = tme2;
 
-      
+
       rsum = 0.0;
       isum = 0.0;
-      
+
       for (i = 0; i < Nc; i ++) {
 	tmp4 = Circum[i] / double(Nw);
 	tmpsum1 = 0.0;
 	tmpsum2 = 0.0;
 	sum2[i] = cmplx( 0.0, 0.0 );
-	
+
 	for (j = 0; j < Nw; j ++) {
-	  
-	  tmpsum1 += imag(Jnj[(i+Nc)*Nw+j] * conjg(Jnj[i*Nw+j])) * tmp4; 
-	  tmpsum2 += real(Jnj[2*Nc*Nw+i] * conjg(Jnj[i*Nw+j])) * tmp4; 
+
+	  tmpsum1 += imag(Jnj[(i+Nc)*Nw+j] * conjg(Jnj[i*Nw+j])) * tmp4;
+	  tmpsum2 += real(Jnj[2*Nc*Nw+i] * conjg(Jnj[i*Nw+j])) * tmp4;
 	  sum2[i] += Jnj[i*Nw+j] * Circum[i] / double(Nw);
-				
+
 	}
-	  
+
 	rsum += tmpsum1;
 	isum += tmpsum2;
-	
+
 	tmp4 = cabs(sum2[i]);
 	sum1[i] = tmp4 * tmp4;
-	
+
       }
-	
+
       for (i = 0; i < Nc; i++) {
-	
+
 	Res[i] = omegamu * rsum / sum1[i];
 	Ind[i] = (-1) * mu * isum / sum1[i];
-	
-      }   
-      
+
+      }
+
       if(i2 == j2) {
 	Res1(i2,i2) = Res[i2];
 	Ind1(i2,i2) = Ind[i2];
-	
+
       } else {
 	Res1(i2,j2) = Res[i2];
 	Ind1(i2,j2) = Ind[i2];
-	Res1(j2,i2) = Res[j2];  
-	Ind1(j2,i2) = Ind[j2];  
-	
+	Res1(j2,i2) = Res[j2];
+	Ind1(j2,i2) = Ind[j2];
+
       }
-      
+
     }
-    
+
   }
-  
+
   //  time(&tme2);
   //  cout << "time 6: " << tme2 - tme1 << endl;
   //  tme1 = tme2;
 
   /* Generate mutual resistance and inductance */
-  
+
   for(i2 = 1; i2 < Nc; i2 ++) {
-    
+
     for(j2 = 1; j2 < Nc; j2 ++) {
-      
+
       if(i2 != j2) {
-	
+
 	Res1(i2,j2) = (Res1(i2,i2)+Res1(j2,j2)-Res1(i2,j2))/2.0;
 	Ind1(i2,j2) = (Ind1(i2,i2)+Ind1(j2,j2)-Ind1(i2,j2))/2.0;
-	
+
       }
-      
+
     }
-    
+
   }
-  
+
 
   time(&end_time);
   //  cout << "time 7: " << end_time - tme1 << endl;
@@ -646,80 +647,80 @@ int main ( int argc, char *argv[] )
 #endif
 
   /* output data into file */
-  
-  *outdata << "--------------------------------------------------------" 
+
+  *outdata << "--------------------------------------------------------"
 	   << endl;
   *outdata << "Resistance/Inductance Values" << endl;
   *outdata << "Input file: " << fileIn << endl;
-  *outdata << "--------------------------------------------------------" 
+  *outdata << "--------------------------------------------------------"
 	   << endl;
 
   *outdata << "Frequency: " << freq << "     Conductivity: " <<
     sigma << "\n" << endl;
-  
+
   *outdata << Nc-1 << ""
 	   << "X" << ""
 	   << Nc-1 << ""
 	   << " Resistance Matrix (Ohm/m):" << endl;
   *outdata <<endl;
-  
+
   for(i2 = 1; i2 < Nc; i2++) {
-    
+
     for(j2 = 1; j2 < Nc; j2++) {
-      
+
       *outdata << Res1(i2,j2) << "     ";
-      *rldata << freq << " " << (Ind1(i2,j2) * 1e9) << " " << 
+      *rldata << freq << " " << (Ind1(i2,j2) * 1e9) << " " <<
 	Res1(i2,j2) << endl;
-      
+
     }
-    
+
     *outdata << endl;
     *outdata << endl;
-    
+
     *xmgrRdata << freq;
-    for(i2 = 1; i2 < Nc; i2++) 
+    for(i2 = 1; i2 < Nc; i2++)
       {
-    
+
       for(j2 = 1; j2 < Nc; j2++)
 	*xmgrRdata << " " << Res1(i2,j2);
-      
+
       }
     *xmgrRdata << endl;
-    
+
 
   }
-  
+
   *outdata << Nc-1 << ""
 	   << "X" << ""
 	   << Nc-1 << ""
 	   << " Inductance Matrix (H/m):" << endl;
   *outdata <<endl;
-  
+
   for(i2 = 1; i2 < Nc; i2 ++) {
-    
+
     for(j2 = 1; j2 < Nc; j2 ++) {
-      
+
       *outdata << Ind1(i2,j2) << "     ";
-      
+
     }
     *outdata << endl;
     *outdata << endl;
-    
+
   }
-  
+
   *outdata << endl;
   *outdata << endl;
-  
+
   *xmgrLdata << freq;
-  for(i2 = 1; i2 < Nc; i2++) 
+  for(i2 = 1; i2 < Nc; i2++)
     {
-      
+
       for(j2 = 1; j2 < Nc; j2++)
 	*xmgrLdata << " " << Ind1(i2,j2) * 1e9;
-      
+
     }
   *xmgrLdata << endl;
-    
+
   *outdata << endl;
 #ifdef HAVE_SYS_TIMES_H
   *outdata << "User CPU time: " << run_times.tms_utime/CLOCKS_PER_SEC << endl;
@@ -732,7 +733,7 @@ int main ( int argc, char *argv[] )
   xmgrLdata->close();
 
   cout << "Calculation Completed." << endl;
-  
+
   return 0;
-  
-}   
+
+}

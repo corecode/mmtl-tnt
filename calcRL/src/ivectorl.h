@@ -2,7 +2,9 @@
 #define _IVectorl__h_
 #include <stdlib.h>
 #include <math.h>
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
 
 class IVectorl
 {
@@ -39,7 +41,7 @@ public:
 
 private:
 
-  int* v;      //            v(0:d-1) 
+  int* v;      //            v(0:d-1)
   int        d;
 };
 

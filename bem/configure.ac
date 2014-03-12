@@ -74,9 +74,7 @@ case "${host}" in
 ;;
 *linux*)
 	#  For Linux, all flavors...
-	#  Use the GNU compilers for C++ and FORTRAN.
-	CXX="g++"
-	F77="g77"
+	#  Let autoconf pick the right compilers by itself
 	AM_CXXFLAGS="-DFORTRAN_UNDERBARS"
 ;;
 esac

@@ -2,17 +2,17 @@
 #define _stdafx__h_
 
 #include <math.h>
-#include <iostream.h>
-#include <iomanip.h>
-#include <fstream.h>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
 #include <stdlib.h>
-#include <iomanip.h>
+#include <iomanip>
 
 #include "complex.h"
 #include "vector.h"
 #include "matrix.h"
 #include "cmplxvec.h"
-#include "cmplxmat.h" 
+#include "cmplxmat.h"
 #include "ivectorl.h"
 
 #include "hankel.h"

@@ -1,8 +1,10 @@
 #ifndef _Vector__h_
 #define _Vector__h_
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
 
 class Vector
 {

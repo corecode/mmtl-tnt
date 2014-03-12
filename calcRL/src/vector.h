@@ -3,8 +3,10 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
 
 class Vector
 {
@@ -230,7 +232,7 @@ inline void  Vector::swap_elem(int m,int n) {
 
   double tmp = v[m];
   v[m] = v[n];
-  v[n] = tmp; 
+  v[n] = tmp;
 }
 
 
